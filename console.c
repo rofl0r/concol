@@ -29,11 +29,11 @@ static rgb_t invalid_color = RGB(0,0,0);
 static FILE* dbg = NULL;
 #endif
 
-void console_savecolors(console* self);
-void console_restorecolors(console* self);
-int console_setcursescolor(console* self, int colornumber, rgb_t color);
-int console_setcolorpair(console* self, int pair, int fgcol, int bgcol);
-int console_usecolorpair(console* self, int pair);
+void console_savecolors(struct console* self);
+void console_restorecolors(struct console* self);
+int console_setcursescolor(struct console* self, int colornumber, rgb_t color);
+int console_setcolorpair(struct console* self, int pair, int fgcol, int bgcol);
+int console_usecolorpair(struct console* self, int pair);
 
 
 
@@ -45,7 +45,7 @@ static inline int console_tothousand(int in) {
 	return in == 0 ? 0 : in == 255 ? 1000 : (in * 3921568) / (1000 * 1000);
 }
 
-static inline void console_inittables(console* self) {
+static inline void console_inittables(struct console* self) {
 	int i;
 	for (i = 0; i < CONSOLE_COLORPAIRCOUNT; i++) {
 		self->colors[i] = invalid_color;
@@ -54,7 +54,7 @@ static inline void console_inittables(console* self) {
 	}
 }
 
-void console_init(console* self) {
+void console_init(struct console* self) {
 	invalid_color.a = 255;
 	self->active.fgcol = -1;
 	self->active.fgcol = -1;
@@ -88,7 +88,7 @@ void console_init(console* self) {
 	
 }
 
-void console_quit(console* self) {
+void console_quit(struct console* self) {
 	clear();
 	refresh();
 	if (self->canChangeColors) console_restorecolors(self);
@@ -98,7 +98,7 @@ void console_quit(console* self) {
 #endif	
 }
 
-void console_savecolors(console* self) {
+void console_savecolors(struct console* self) {
 	short int i;
 	short int r,g,b;
 	short int fg, bg;
@@ -113,7 +113,7 @@ void console_savecolors(console* self) {
 	}
 }
 
-void console_restorecolors(console* self) {
+void console_restorecolors(struct console* self) {
 	int i;
 	for (i = MIN_COLOR_NUMBER; i <= self->maxcolor; i++) {
 		init_color(i, 
@@ -128,7 +128,7 @@ void console_restorecolors(console* self) {
 }
 
 // needs color additionally to be used by restorecolors
-int console_setcursescolor(console* self, int colornumber, rgb_t color) {
+static int console_setcursescolor(struct console* self, int colornumber, rgb_t color) {
 #ifdef CONSOLE_DEBUG
 	if(dbg) fprintf(dbg, "setcursescolor: %d (%d, %d, %d)\n", colornumber, color.r, color.g, color.b);
 #endif
@@ -149,7 +149,7 @@ int console_setcursescolor(console* self, int colornumber, rgb_t color) {
 	return init_color(colornumber+MIN_COLOR_NUMBER, nr, ng, nb) != FALSE;
 }
 
-int console_setcolor(console* self, rgb_t mycolor, int fg) {
+int console_setcolor(struct console* self, rgb_t mycolor, int fg) {
 	int i;
 	int* which = fg ? &self->active.fgcol : &self->active.bgcol;
 	
@@ -183,7 +183,7 @@ int console_setcolor(console* self, rgb_t mycolor, int fg) {
 }
 
 // sends the right "colorpair" to ncurses
-void console_initoutput(console* self) {
+void console_initoutput(struct console* self) {
 	int i;
 	if (self->active.fgcol == -1) console_setcolor(self, RGB(0xFF, 0xFF, 0xFF), 1);
 	if (self->active.bgcol == -1) console_setcolor(self, RGB(0, 0, 0), 0);
@@ -211,7 +211,7 @@ void console_initoutput(console* self) {
 	return; // "colorpair not found");
 }
 
-int console_setcolorpair(console* self, int pair, int fgcol, int bgcol) {
+static int console_setcolorpair(struct console* self, int pair, int fgcol, int bgcol) {
 	if(fgcol >= CONSOLE_COLORPAIRCOUNT || bgcol >= CONSOLE_COLORPAIRCOUNT) return 0; // "color pair is out of index");
 	if (!self->hasColors) return 0;
 #ifdef CONSOLE_DEBUG
@@ -223,7 +223,7 @@ int console_setcolorpair(console* self, int pair, int fgcol, int bgcol) {
 	return init_pair(pair+MIN_COLORPAIR_NUMBER, fgcol+MIN_COLOR_NUMBER, bgcol+MIN_COLOR_NUMBER) != FALSE;
 }
 
-int console_usecolorpair(console* self, int pair) {
+static int console_usecolorpair(struct console* self, int pair) {
 	if(pair >= CONSOLE_COLORPAIRCOUNT) return 0;
 	if (!self->hasColors) return 0;
 	self->lastused.fgcol = self->active.fgcol;
@@ -236,7 +236,7 @@ int console_usecolorpair(console* self, int pair) {
 	return 1;
 }
 
-void console_getsize(console* self, int* x, int* y){
+void console_getsize(struct console* self, int* x, int* y){
 	(void)self;
 	if(stdscr) {
 		*x = stdscr->_maxx + 1;
@@ -244,21 +244,21 @@ void console_getsize(console* self, int* x, int* y){
 	} else { *y = -1; *x = -1; }
 }
 
-void console_gotoxy(console* self, int x, int y) {
+void console_gotoxy(struct console* self, int x, int y) {
 	move(y, x);
 	self->x = x;
 	self->y = y;
 }
 
 // print a char at current location
-void console_addchar(console* self, int c, unsigned int attributes) {
+void console_addchar(struct console* self, int c, unsigned int attributes) {
 	console_initoutput(self);
 	waddch(stdscr, c | attributes | self->lastattr);
 	//waddch(stdscr, c | attributes);
 }
 
 // prints a char and advances cursor
-void console_printchar(console* self, int c, unsigned int attributes) {
+void console_printchar(struct console* self, int c, unsigned int attributes) {
 	int newx = self->x == stdscr->_maxx ? 1 : self->x + 1;
 	int newy = self->x == stdscr->_maxx ? self->y + 1 : self->y;
 	console_addchar(self, c, attributes);
@@ -266,27 +266,27 @@ void console_printchar(console* self, int c, unsigned int attributes) {
 }	
 
 
-void console_printxy (console* self, int x, int y, char* text) {
+void console_printxy (struct console* self, int x, int y, char* text) {
 	console_initoutput(self);
 	mvprintw(x, y, "%s", text, 0);
 }
 
-int console_getkey(console* self) {
+int console_getkey(struct console* self) {
 	(void)self;
 	return wgetch(stdscr);
 }
 
-void console_sleep(console* self, int ms) {
+void console_sleep(struct console* self, int ms) {
 	(void)self;
 	napms(ms);
 }
 
-void console_refresh(console* self) {
+void console_refresh(struct console* self) {
 	(void)self;
 	refresh();
 }
 
-void console_clear(console* self) {
+void console_clear(struct console* self) {
 	(void)self;
 	clear();
 }

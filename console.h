@@ -74,7 +74,7 @@ typedef struct {
 	int bgcol;
 } Colorpair;
 
-typedef struct {
+typedef struct console {
 	int hasColors;
 	int canChangeColors;
 	int x;
@@ -92,19 +92,19 @@ typedef struct {
 	short int org_bgcolors[CONSOLE_COLORPAIRCOUNT];
 } console;
 
-void console_init(console* self);
-void console_quit(console* self);
-int console_setcolor(console* self, rgb_t mycolor, int fg);
-void console_initoutput(console* self);
-void console_getsize(console* self, int* x, int* y);
-void console_gotoxy(console* self, int x, int y);
-void console_addchar(console* self, int c, unsigned int attributes);
-void console_printchar(console* self, int c, unsigned int attributes);
-void console_printxy (console* self, int x, int y, char* text);
-int console_getkey(console* self);
-void console_sleep(console* self, int ms);
-void console_refresh(console* self);
-void console_clear(console* self);
+void console_init(struct console* self);
+void console_quit(struct console* self);
+int console_setcolor(struct console* self, rgb_t mycolor, int fg);
+void console_initoutput(struct console* self);
+void console_getsize(struct console* self, int* x, int* y);
+void console_gotoxy(struct console* self, int x, int y);
+void console_addchar(struct console* self, int c, unsigned int attributes);
+void console_printchar(struct console* self, int c, unsigned int attributes);
+void console_printxy (struct console* self, int x, int y, char* text);
+int console_getkey(struct console* self);
+void console_sleep(struct console* self, int ms);
+void console_refresh(struct console* self);
+void console_clear(struct console* self);
 
 
 #endif /* CONSOLEWINDOW_H_ */

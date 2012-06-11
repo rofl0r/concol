@@ -1,11 +1,11 @@
 #include <stdlib.h>
-#include "console.h"
+#include "../console.h"
 
 int main(void) {
 	static const char japh[] = "just another perl/unix hacker";
 	static const size_t jl = sizeof(japh);
-	console co;
-	console* c = &co;
+	struct console co;
+	struct console* c = &co;
 	int w, h, x, y = 0;
 	console_init(c);
 	console_getsize(c, &w, &h);
