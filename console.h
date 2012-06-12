@@ -24,7 +24,8 @@ void console_getcursor(struct Console* self, int* x, int* y);
 void console_goto(struct Console* self, int x, int y);
 void console_addchar(struct Console* self, int c, unsigned int attributes);
 void console_printchar(struct Console* self, int c, unsigned int attributes);
-void console_printxy (struct Console* self, int x, int y, char* text);
+void console_printfxy (struct Console* con, int x, int y, const char* fmt, ...);
+void console_printf (struct Console* con, const char* fmt, ...);
 int console_getkey(struct Console* self);
 void console_sleep(struct Console* self, int ms);
 void console_refresh(struct Console* self);
@@ -37,7 +38,6 @@ void sdlconsole_init(sdlconsole* c, point resolution, font* fnt);
 rgb_tuple sdlconsole_getcolors(sdlconsole* c);
 void sdlconsole_putchar(sdlconsole* c, int ch, int doupdate);
 int sdlconsole_getchar(sdlconsole* c);
-void sdlconsole_printf(sdlconsole* c, const char* fmt, ...);
 void sdlconsole_cursor_up(sdlconsole* c);
 void sdlconsole_cursor_down(sdlconsole* c);
 void sdlconsole_cursor_left(sdlconsole* c);
@@ -49,6 +49,7 @@ OK void sdlconsole_setcolor(sdlconsole* c, int is_fg, sdl_rgb_t color);
 OK void sdlconsole_setcolors(sdlconsole* c, sdl_rgb_t bgcolor, sdl_rgb_t fgcolor);
 OK void sdlconsole_getcursor(sdlconsole* c, int* x, int* y);
 OK void sdlconsole_getbounds(sdlconsole* c, int* x, int* y);
+OK void sdlconsole_printf(sdlconsole* c, const char* fmt, ...);
 
 EVAL:
 

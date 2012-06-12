@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #define MIN_COLORPAIR_NUMBER 1
 #define MIN_COLOR_NUMBER 0
@@ -291,10 +292,24 @@ void console_printchar(struct Console* con, int c, unsigned int attributes) {
 	console_goto(con, newx, newy);
 }
 
-
-void console_printxy (struct Console* con, int x, int y, char* text) {
+void console_printf (struct Console* con, const char* fmt, ...) {
 	console_initoutput(con);
-	mvprintw(x, y, "%s", text, 0);
+	char buf[256];
+	va_list ap;
+	va_start(ap, fmt);
+	ssize_t result = vsnprintf(buf, sizeof(buf), fmt, ap);
+	va_end(ap);
+	mvprintw(con->cursor.y, con->cursor.x, "%s", buf, 0);
+}
+
+void console_printfxy (struct Console* con, int x, int y, const char* fmt, ...) {
+	console_initoutput(con);
+	char buf[256];
+	va_list ap;
+	va_start(ap, fmt);
+	ssize_t result = vsnprintf(buf, sizeof(buf), fmt, ap);
+	va_end(ap);
+	mvprintw(y, x, "%s", buf, 0);
 }
 
 int console_getkey(struct Console* con) {
