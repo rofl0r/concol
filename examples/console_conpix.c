@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
 	finish_him:
 	console_getkey(t);
 	
-	console_quit(t);
+	console_cleanup(t);
 
 	return 0;
 }

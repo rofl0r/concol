@@ -86,6 +86,6 @@ int main(void) {
 	
 	console_getkey(c);
 	console_clear(c);
-	console_quit(c);
+	console_cleanup(c);
 	return 0;
 }

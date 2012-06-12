@@ -10,8 +10,11 @@ typedef struct Console {
 	Cursor cursor;
 } Console;
 
+/* initialize a Console struct */
 void console_init(struct Console* self);
-void console_quit(struct Console* self);
+/* cleanup restores the original term behaviour and releases acquired resources. */
+void console_cleanup(struct Console* self);
+
 int console_setcolor(struct Console* self, int is_fg, rgb_t mycolor);
 int console_setcolors(struct Console* self, rgb_t bgcolor, rgb_t fgcolor);
 void console_initoutput(struct Console* self);
@@ -32,7 +35,6 @@ TODO :
 void sdlconsole_init(sdlconsole* c, point resolution, font* fnt);
 void sdlconsole_getbounds(sdlconsole* c, int* x, int* y);
 rgb_tuple sdlconsole_getcolors(sdlconsole* c);
-void sdlconsole_cleanup(sdlconsole* c);
 void sdlconsole_putchar(sdlconsole* c, int ch, int doupdate);
 int sdlconsole_getchar(sdlconsole* c);
 void sdlconsole_printf(sdlconsole* c, const char* fmt, ...);
@@ -41,6 +43,7 @@ void sdlconsole_cursor_down(sdlconsole* c);
 void sdlconsole_cursor_left(sdlconsole* c);
 void sdlconsole_cursor_right(sdlconsole* c);
 
+OK void sdlconsole_cleanup(sdlconsole* c);
 OK void sdlconsole_goto(sdlconsole* c, int x, int y);
 OK void sdlconsole_setcolor(sdlconsole* c, int is_fg, sdl_rgb_t color);
 OK void sdlconsole_setcolors(sdlconsole* c, sdl_rgb_t bgcolor, sdl_rgb_t fgcolor);
