@@ -18,7 +18,8 @@ void console_cleanup(struct Console* self);
 int console_setcolor(struct Console* self, int is_fg, rgb_t mycolor);
 int console_setcolors(struct Console* self, rgb_t bgcolor, rgb_t fgcolor);
 void console_initoutput(struct Console* self);
-void console_getsize(struct Console* self, int* x, int* y);
+/* get width and height of the console display (in characters) */
+void console_getbounds(struct Console* self, int* width, int* height);
 void console_getcursor(struct Console* self, int* x, int* y);
 void console_goto(struct Console* self, int x, int y);
 void console_addchar(struct Console* self, int c, unsigned int attributes);
@@ -33,7 +34,6 @@ void console_clear(struct Console* self);
 TODO :
 
 void sdlconsole_init(sdlconsole* c, point resolution, font* fnt);
-void sdlconsole_getbounds(sdlconsole* c, int* x, int* y);
 rgb_tuple sdlconsole_getcolors(sdlconsole* c);
 void sdlconsole_putchar(sdlconsole* c, int ch, int doupdate);
 int sdlconsole_getchar(sdlconsole* c);
@@ -48,6 +48,7 @@ OK void sdlconsole_goto(sdlconsole* c, int x, int y);
 OK void sdlconsole_setcolor(sdlconsole* c, int is_fg, sdl_rgb_t color);
 OK void sdlconsole_setcolors(sdlconsole* c, sdl_rgb_t bgcolor, sdl_rgb_t fgcolor);
 OK void sdlconsole_getcursor(sdlconsole* c, int* x, int* y);
+OK void sdlconsole_getbounds(sdlconsole* c, int* x, int* y);
 
 EVAL:
 

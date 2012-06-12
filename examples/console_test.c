@@ -10,7 +10,7 @@ int main(void) {
 	struct Console* c = &co.super;
 	int w, h, x, y = 0;
 	console_init(c);
-	console_getsize(c, &w, &h);
+	console_getbounds(c, &w, &h);
 	//console_setcolors(c, RGB(200, 80, 200), RGB(80, 80, 80));
 	console_setcolors(c, RGB3(BLACK), RGB3(ORANGE));
 

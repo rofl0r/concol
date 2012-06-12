@@ -94,7 +94,7 @@ void console_init(struct Console* con) {
 	
 }
 
-void console_quit(struct Console* con) {
+void console_cleanup(struct Console* con) {
 	struct NcConsole *self = (struct NcConsole*) con;
 	clear();
 	refresh();
@@ -253,7 +253,7 @@ static int console_usecolorpair(struct NcConsole* con, int pair) {
 	return 1;
 }
 
-void console_getsize(struct Console* con, int* x, int* y) {
+void console_getbounds(struct Console* con, int* x, int* y) {
 	(void)con;
 	if(stdscr) {
 		*x = stdscr->_maxx + 1;

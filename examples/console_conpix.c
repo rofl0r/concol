@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 
 	console_init(t);
 
-	console_getsize(t, &cx, &cy);
+	console_getbounds(t, &cx, &cy);
 
 	pngfile = pixRead(filename);
 
