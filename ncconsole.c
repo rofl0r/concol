@@ -253,12 +253,17 @@ static int console_usecolorpair(struct NcConsole* con, int pair) {
 	return 1;
 }
 
-void console_getsize(struct Console* con, int* x, int* y){
+void console_getsize(struct Console* con, int* x, int* y) {
 	(void)con;
 	if(stdscr) {
 		*x = stdscr->_maxx + 1;
 		*y = stdscr->_maxy + 1;
 	} else { *y = -1; *x = -1; }
+}
+
+void console_getcursor(struct Console* con, int* x, int* y) {
+	*x = con->cursor.x;
+	*y = con->cursor.y;
 }
 
 void console_goto(struct Console* con, int x, int y) {
