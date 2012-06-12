@@ -1,4 +1,10 @@
 *~
+*.out
+*.rcb
+*.o
+*.a
+*.lo
+*.so
 examples/console_conpix
 examples/console_test
 examples/conpix_linux_x64_static
