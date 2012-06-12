@@ -1,5 +1,5 @@
 /*
- * console.h
+ * ncconsole.h
  *
  * Created on: 29.11.2010
  * 
@@ -59,13 +59,17 @@
  * 
  */
 
-#ifndef CONSOLEWINDOW_H_
-#define CONSOLEWINDOW_H_
+#ifndef NCCONSOLE_H_
+#define NCCONSOLE_H_
 
 #include <stdint.h>
 #include <curses.h>
 
+//RcB: LINK "-lncurses"
+//RcB: DEP "ncconsole.c"
+
 #include "rgb.h"
+#include "console.h"
 
 #define CONSOLE_COLORPAIRCOUNT 256
 
@@ -74,11 +78,11 @@ typedef struct {
 	int bgcol;
 } Colorpair;
 
-typedef struct console {
+typedef struct NcConsole {
+	struct Console super;
+	char org_term[32];
 	int hasColors;
 	int canChangeColors;
-	int x;
-	int y;
 	int maxcolor;
 
 	attr_t lastattr;
@@ -90,21 +94,6 @@ typedef struct console {
 	rgb_t org_colors[CONSOLE_COLORPAIRCOUNT];
 	short int org_fgcolors[CONSOLE_COLORPAIRCOUNT];
 	short int org_bgcolors[CONSOLE_COLORPAIRCOUNT];
-} console;
+} NcConsole;
 
-void console_init(struct console* self);
-void console_quit(struct console* self);
-int console_setcolor(struct console* self, rgb_t mycolor, int fg);
-void console_initoutput(struct console* self);
-void console_getsize(struct console* self, int* x, int* y);
-void console_gotoxy(struct console* self, int x, int y);
-void console_addchar(struct console* self, int c, unsigned int attributes);
-void console_printchar(struct console* self, int c, unsigned int attributes);
-void console_printxy (struct console* self, int x, int y, char* text);
-int console_getkey(struct console* self);
-void console_sleep(struct console* self, int ms);
-void console_refresh(struct console* self);
-void console_clear(struct console* self);
-
-
-#endif /* CONSOLEWINDOW_H_ */
+#endif

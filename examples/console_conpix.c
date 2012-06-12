@@ -13,14 +13,15 @@
 
 #include <leptonica/allheaders.h>
 
-#include "../console.h"
+#include "../ncconsole.h"
 //#include "strlib.h"
+//RcB: LINK "-llept"
 
 int main(int argc, char** argv) {
 	char* filename;
 	int scaleFullScreen = 0;
-	console co;
-	console* t = &co;
+	NcConsole co;
+	Console* t = &co.super;
 	int cx; int cy;
 	int w, h;
 	int iterX, iterY;
@@ -90,8 +91,8 @@ int main(int argc, char** argv) {
 
 	for (iy = 0; iy < iterY; iy++){
 		for (ix = 0; ix < iterX; ix++){
-			console_setcolor(t, *((rgb_t*) bufptr), 0);
-			console_gotoxy(t, ix, iy);
+			console_setcolor(t, 0, *((rgb_t*) bufptr));
+			console_goto(t, ix, iy);
 			console_addchar(t, ' ', 0);
 			bufptr++;
 		}

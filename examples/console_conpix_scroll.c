@@ -14,15 +14,16 @@
 #include <unistd.h>
 
 #include <leptonica/allheaders.h>
+//RcB: LINK "-llept"
 
-#include "console.h"
-#include "strlib.h"
+#include "../ncconsole.h"
+#include "../../lib/include/strlib.h"
 
 int main(int argc, char** argv) {
 	char* filename;
 	int scaleFullScreen = 0;
-	console co;
-	console* t = &co;
+	NcConsole co;
+	Console* t = &co.super;
 	int cx; int cy;
 	int w, h;
 	int iterX, iterY;
@@ -86,8 +87,8 @@ int main(int argc, char** argv) {
 	for(iy = starty; iy < starty + cy; iy++) {
 		bufptr = (int*) pix32->data + (iy * pix32->w) + startx;
 		for(ix = startx; ix < startx + cx; ix++) {
-			console_setcolor(t, *((rgb_t*) bufptr), 0);
-			console_gotoxy(t, ix - startx, iy - starty);
+			console_setcolor(t, 0, *((rgb_t*) bufptr));
+			console_goto(t, ix - startx, iy - starty);
 			console_addchar(t, ' ', 0);
 			bufptr++;
 		}
@@ -96,7 +97,7 @@ int main(int argc, char** argv) {
 	
 	while ((c = console_getkey(t)) != 'q') {
 
-		console_setcolor(t, RGB(0,0,0), 0);
+		console_setcolor(t, 0, RGB(0,0,0));
 		
 		switch(c) {
 			case 3: 
