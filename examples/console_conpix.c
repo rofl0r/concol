@@ -15,6 +15,9 @@
 
 #include "../console.h"
 #include "../console_backend.h"
+#if (CONSOLE_BACKEND == SDL_CONSOLE)
+#include "../fonts/testfont.h"
+#endif
 //#include "strlib.h"
 //RcB: LINK "-llept"
 
@@ -52,6 +55,10 @@ int main(int argc, char** argv) {
 	}
 
 	console_init(t);
+#if (CONSOLE_BACKEND == SDL_CONSOLE)
+	point reso = {800, 600};
+	sdlconsole_init(&co, reso, &testfont);
+#endif
 
 	console_getbounds(t, &cx, &cy);
 

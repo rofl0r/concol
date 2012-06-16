@@ -32,6 +32,12 @@ typedef union {
 	uint32_t asInt;
 } rgb_t;
 
+typedef struct {
+	rgb_t bgcolor;
+	rgb_t fgcolor;
+} rgb_tuple;
+
+
 #ifdef IS_LITTLE_ENDIAN
 #define RGB(x,y,z) ((rgb_t) {{0, z, y, x}})
 #else

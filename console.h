@@ -1,12 +1,18 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
+//RcB: DEP "console.c"
+
 #include "point.h"
+#include "rect.h"
 #include "console_events.h"
 
 typedef struct Console {
 	point cursor;
+	point dim; //dimensions
 	mouse_event mouse;
+	int automove:1; // flag which affects putchar and printf (cursor will be advanced)
+	int isblinking:1;
 } Console;
 
 #include "rgb.h"
@@ -27,15 +33,40 @@ void console_goto(struct Console* self, int x, int y);
 void console_addchar(struct Console* self, int c, unsigned int attributes);
 /* prints a char and advances cursor */
 void console_printchar(struct Console* self, int c, unsigned int attributes);
-void console_printfxy (struct Console* con, int x, int y, const char* fmt, ...);
+
+/* prints a char and updates (redraws) the screen when doupdate is 1. advances cursor if automove is set. */
+void console_putchar(Console* self, int ch, int doupdate);
+
+//void console_printfxy (struct Console* con, int x, int y, const char* fmt, ...);
+
+#define console_printfxy(con, x, y, ...) do { console_goto(con, x, y); console_printf(con, __VA_ARGS__); } while (0)
+
 void console_printf (struct Console* con, const char* fmt, ...);
 /* blocking */
 int console_getkey(struct Console* self);
 /* non-blocking */
 int console_getkey_nb(struct Console* self);
 void console_sleep(struct Console* self, int ms);
+
+#define console_draw(C) console_refresh(C)
 void console_refresh(struct Console* self);
 void console_clear(struct Console* self);
+
+void console_lock(void);
+void console_unlock(void);
+void console_blink_cursor(struct Console* self);
+
+// generic
+void console_fill(Console *c, rect* area, int ch);
+mouse_event console_getmouse(Console* c);
+void console_advance_cursor(Console* c, int steps);
+void console_setautomove(Console* c, int automove);
+void console_linebreak(Console* c);
+void console_cursor_up(Console* c);
+void console_cursor_down(Console* c);
+void console_cursor_left(Console* c);
+void console_cursor_right(Console* c);
+void console_unblink(Console* c);
 
 /*
 TODO :

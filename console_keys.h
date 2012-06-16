@@ -11,6 +11,7 @@
 // we use first 9 bits for keys and special keys.
 #define CK_UNDEF 0
 #define CK_ERR CK_UNDEF
+#define CK_QUIT 1
 #define CK_TAB 9
 #define CK_ESCAPE 27
 // +/- on numeric pad

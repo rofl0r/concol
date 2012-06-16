@@ -3,7 +3,9 @@
 #include "../console.h"
 #include "../console_backend.h"
 #include "../colors.h"
-
+#if (CONSOLE_BACKEND == SDL_CONSOLE)
+#include "../fonts/testfont.h"
+#endif
 int main(void) {
 	static const char japh[] = "just another perl/unix hacker";
 	static const size_t jl = sizeof(japh) - 1;
@@ -11,6 +13,10 @@ int main(void) {
 	struct Console* c = &co.super;
 	int w, h, x, y = 0;
 	console_init(c);
+#if (CONSOLE_BACKEND == SDL_CONSOLE)
+	point reso = {800, 600};
+	sdlconsole_init(&co, reso, &testfont);
+#endif
 	console_getbounds(c, &w, &h);
 	//console_setcolors(c, RGB(200, 80, 200), RGB(80, 80, 80));
 	console_setcolors(c, RGB3(BLACK), RGB3(ORANGE));

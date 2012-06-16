@@ -99,6 +99,9 @@ void console_init(struct Console* con) {
 	self->lastused.fgcol = -1;
 	self->lastused.bgcol = -1;
 	
+	con->dim.x = stdscr->_maxx + 1;
+	con->dim.y = stdscr->_maxy + 1;
+	
 #ifdef CONSOLE_DEBUG	
 	dbg = fopen("console.log", "w");
 #endif	
@@ -202,12 +205,6 @@ int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
 	return 0; // "could not set color");
 }
 
-int console_setcolors(struct Console* self, rgb_t bgcolor, rgb_t fgcolor) {
-	return
-		console_setcolor(self, 0, bgcolor) +
-		console_setcolor(self, 1, fgcolor);
-}
-
 // sends the right "colorpair" to ncurses
 void console_initoutput(struct Console* con) {
 	struct NcConsole *self = (struct NcConsole*) con;
@@ -267,14 +264,9 @@ static int console_usecolorpair(struct NcConsole* con, int pair) {
 void console_getbounds(struct Console* con, int* x, int* y) {
 	(void)con;
 	if(stdscr) {
-		*x = stdscr->_maxx + 1;
-		*y = stdscr->_maxy + 1;
+		con->dim.x = *x = stdscr->_maxx + 1;
+		con->dim.y = *y = stdscr->_maxy + 1;
 	} else { *y = -1; *x = -1; }
-}
-
-void console_getcursor(struct Console* con, int* x, int* y) {
-	*x = con->cursor.x;
-	*y = con->cursor.y;
 }
 
 void console_goto(struct Console* con, int x, int y) {
@@ -302,6 +294,13 @@ void console_printchar(struct Console* con, int c, unsigned int attributes) {
 	console_goto(con, newx, newy);
 }
 
+void console_putchar(Console* self, int ch, int doupdate) {
+	console_addchar(self, ch, 0);
+	if(self->automove) console_advance_cursor(self, 1);
+	if(doupdate) console_refresh(self);
+}
+
+/*
 void console_printf (struct Console* con, const char* fmt, ...) {
 	console_initoutput(con);
 	char buf[512];
@@ -323,6 +322,7 @@ void console_printfxy (struct Console* con, int x, int y, const char* fmt, ...) 
 	va_end(ap);
 	mvprintw(y, x, "%s", buf, 0);
 }
+*/
 
 static int check_modifier_state(mmask_t state) {
 	int ret = 0;
@@ -418,3 +418,8 @@ void console_clear(struct Console* con) {
 	(void)con;
 	clear();
 }
+
+void console_blink_cursor(struct Console* self) { (void) self; }
+void console_lock(void) {}
+void console_unlock(void) {}
+

@@ -27,6 +27,8 @@ void console_init(struct Console* self) {
 	tb_init();
 	tb_select_input_mode(TB_INPUT_ESC);
 	tb_clear();
+	self->dim.x = tb_width();
+	self->dim.y = tb_height();	
 }
 
 /* cleanup restores the original term behaviour and releases acquired resources. */
@@ -70,28 +72,19 @@ int console_setcolor(struct Console* self, int is_fg, rgb_t mycolor) {
 	return 1;
 }
 
-int console_setcolors(struct Console* self, rgb_t bgcolor, rgb_t fgcolor) {
-	return
-		console_setcolor(self, 0, bgcolor) +
-		console_setcolor(self, 1, fgcolor);
-}
-
 void console_initoutput(struct Console* self) {}
+
 /* get width and height of the console display (in characters) */
 void console_getbounds(struct Console* self, int* width, int* height) {
-	*width = tb_width();
-	*height = tb_height();
-}
-
-void console_getcursor(struct Console* self, int* x, int* y) {
-	*x = self->cursor.x;
-	*y = self->cursor.y;
+	self->dim.x = *width = tb_width();
+	self->dim.y = *height = tb_height();
 }
 
 void console_goto(struct Console* self, int x, int y) {
 	self->cursor.x = x;
 	self->cursor.y = y;
 }
+
 /* prints a char and NOT advances cursor */
 void console_addchar(struct Console* self, int c, unsigned int attributes) {
 	struct TbConsole *con = (struct TbConsole*) self;
@@ -106,6 +99,14 @@ void console_printchar(struct Console* con, int c, unsigned int attributes) {
 	console_goto(con, newx, newy);
 }
 
+void console_putchar(Console* self, int ch, int doupdate) {
+	console_addchar(self, ch, 0);
+	if(self->automove) console_advance_cursor(self, 1);
+	if(doupdate) console_refresh(self);
+}
+
+
+/*
 static void print_tb(const char *str, unsigned int x, unsigned int y, uint16_t fg, uint16_t bg) {
 	while (*str) {
 		uint32_t uni;
@@ -137,7 +138,7 @@ void console_printfxy (struct Console* con, int x, int y, const char* fmt, ...) 
 	(void) result;
 	va_end(ap);
 	print_tb (buf, x, y, self->fgcolor, self->bgcolor);
-}
+}*/
 #define TB_KEY_MIN TB_KEY_ARROW_RIGHT
 #define TB_KEY_MAX TB_KEY_F1
 static const unsigned char key_table[] = {
@@ -230,3 +231,8 @@ void console_clear(struct Console* self) {
 	(void) self;
 	tb_clear();
 }
+
+void console_blink_cursor(struct Console* self) { (void) self; }
+void console_lock(void) {}
+void console_unlock(void) {}
+

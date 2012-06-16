@@ -17,8 +17,12 @@
 //RcB: LINK "-llept"
 
 #include "../console.h"
+#include "../console_keys.h"
 #include "../console_backend.h"
 #include "../../lib/include/strlib.h"
+#if (CONSOLE_BACKEND == SDL_CONSOLE)
+#include "../fonts/testfont.h"
+#endif
 
 int main(int argc, char** argv) {
 	char* filename;
@@ -36,7 +40,7 @@ int main(int argc, char** argv) {
 	struct Pix* palette;
 	struct Pix* pix32;
 	int i, ix, iy;
-	char c;
+	int c;
 	
 	for (i = 1; i<argc; i++) {
 		if (strlen(argv[i]) > 1 && !memcmp(argv[i], "-f", 2)) 
@@ -55,6 +59,10 @@ int main(int argc, char** argv) {
 	}
 
 	console_init(t);
+#if (CONSOLE_BACKEND == SDL_CONSOLE)
+	point reso = {800, 600};
+	sdlconsole_init(&co, reso, &testfont);
+#endif
 
 	console_getbounds(t, &cx, &cy);
 
@@ -93,26 +101,27 @@ int main(int argc, char** argv) {
 			console_addchar(t, ' ', 0);
 			bufptr++;
 		}
-	}	
-	console_printfxy(t, 0, 0, "%d", (int) c);
+	}
+	console_draw(t);
+	//console_printfxy(t, 0, 0, "%d", (int) c);
 	
 	while ((c = console_getkey(t)) != 'q') {
 
 		console_setcolor(t, 0, RGB(0,0,0));
 		
 		switch(c) {
-			case 3: 
+			case CK_CURSOR_UP: 
 				if(starty > 0) starty--;
 				break;
-			case 2:
+			case CK_CURSOR_DOWN:
 				if(starty < pix32->h - cy)
 					starty++;
 				break;
-			case 4:
+			case CK_CURSOR_LEFT:
 				if(startx > 0)
 					startx--;
 				break;
-			case 5:
+			case CK_CURSOR_RIGHT:
 				if(startx < pix32->w - cx)
 					startx++;
 				break;
