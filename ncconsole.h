@@ -81,8 +81,9 @@ typedef struct {
 typedef struct NcConsole {
 	struct Console super;
 	char org_term[32];
-	int hasColors;
-	int canChangeColors;
+	int hasColors:1;
+	int canChangeColors:1;
+	int hasMouse:1;
 	int maxcolor;
 
 	attr_t lastattr;

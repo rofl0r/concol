@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include "console_keys.h"
 
 #define MIN_COLORPAIR_NUMBER 1
 #define MIN_COLOR_NUMBER 0
@@ -74,6 +75,7 @@ void console_init(struct Console* con) {
 	noecho();
 	cbreak();
 	keypad(stdscr, TRUE);
+	nonl(); // get return key events
 	
 	self->hasColors = has_colors();
 	self->canChangeColors = self->hasColors ? can_change_color() : 0;
@@ -81,6 +83,14 @@ void console_init(struct Console* con) {
 
 	if (self->canChangeColors)
 		console_savecolors(self);
+	
+	self->hasMouse = has_mouse();
+	if(self->hasMouse) {
+		self->hasMouse = mousemask(/*ALL_MOUSE_EVENTS*/ 
+			BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED |
+			BUTTON1_RELEASED | BUTTON2_RELEASED | BUTTON3_RELEASED |
+			REPORT_MOUSE_POSITION, NULL) != ERR;
+	}
 	
 	self->lastattr = 0;
 	
@@ -294,34 +304,111 @@ void console_printchar(struct Console* con, int c, unsigned int attributes) {
 
 void console_printf (struct Console* con, const char* fmt, ...) {
 	console_initoutput(con);
-	char buf[256];
+	char buf[512];
 	va_list ap;
 	va_start(ap, fmt);
 	ssize_t result = vsnprintf(buf, sizeof(buf), fmt, ap);
+	(void) result;
 	va_end(ap);
 	mvprintw(con->cursor.y, con->cursor.x, "%s", buf, 0);
 }
 
 void console_printfxy (struct Console* con, int x, int y, const char* fmt, ...) {
 	console_initoutput(con);
-	char buf[256];
+	char buf[512];
 	va_list ap;
 	va_start(ap, fmt);
 	ssize_t result = vsnprintf(buf, sizeof(buf), fmt, ap);
+	(void) result;
 	va_end(ap);
 	mvprintw(y, x, "%s", buf, 0);
 }
 
+static int check_modifier_state(mmask_t state) {
+	int ret = 0;
+	if(state & BUTTON_SHIFT) ret |= CK_MOD_SHIFT;
+	if(state & BUTTON_ALT)   ret |= CK_MOD_ALT;
+	if(state & BUTTON_CTRL)  ret |= CK_MOD_CTRL;
+	return ret;
+}
+
+static int translate_event(struct NcConsole *self, int key) {
+	int ret = 0;
+	MEVENT mouse_ev;
+	
+	switch(key) {
+		case KEY_MOUSE:
+			if (getmouse(&mouse_ev) == ERR) {
+				ret = CK_UNDEF;
+				break;
+			}
+			ret = CK_MOUSE_EVENT;
+			self->super.mouse.coords.x = mouse_ev.x;
+			self->super.mouse.coords.y = mouse_ev.y;
+			if(mouse_ev.bstate & BUTTON1_PRESSED ||
+			   mouse_ev.bstate & BUTTON2_PRESSED ||
+			   mouse_ev.bstate & BUTTON3_PRESSED) {
+				self->super.mouse.mouse_ev = ME_BUTTON_DOWN;
+				if     (mouse_ev.bstate & BUTTON1_PRESSED) self->super.mouse.button = MB_LEFT;
+				else if(mouse_ev.bstate & BUTTON2_PRESSED) self->super.mouse.button = MB_RIGHT;
+				else if(mouse_ev.bstate & BUTTON3_PRESSED) self->super.mouse.button = MB_MIDDLE;
+			} else if(mouse_ev.bstate & BUTTON1_RELEASED ||
+			          mouse_ev.bstate & BUTTON2_RELEASED ||
+			          mouse_ev.bstate & BUTTON3_RELEASED) {
+				self->super.mouse.mouse_ev = ME_BUTTON_UP;
+				if     (mouse_ev.bstate & BUTTON1_RELEASED) self->super.mouse.button = MB_LEFT;
+				else if(mouse_ev.bstate & BUTTON2_RELEASED) self->super.mouse.button = MB_RIGHT;
+				else if(mouse_ev.bstate & BUTTON3_RELEASED) self->super.mouse.button = MB_MIDDLE;
+			} else {
+				self->super.mouse.mouse_ev = ME_MOVE;
+				self->super.mouse.button = MB_NONE;
+			}
+			ret |= check_modifier_state(mouse_ev.bstate);
+			break;
+		case KEY_RESIZE:
+			ret = CK_RESIZE_EVENT;
+			break;
+		case KEY_UP:
+			ret = CK_CURSOR_UP;
+			break;
+		case KEY_DOWN:
+			ret = CK_CURSOR_DOWN;
+			break;
+		case KEY_LEFT:
+			ret = CK_CURSOR_LEFT;
+			break;
+		case KEY_RIGHT:
+			ret = CK_CURSOR_RIGHT;
+			break;
+			
+		default:
+			ret = key;
+	}
+	return ret;
+}
+
+/* if no input is waiting, the value ERR (-1) is returned */
 int console_getkey(struct Console* con) {
 	(void)con;
-	return wgetch(stdscr);
+	int ret = wgetch(stdscr);
+	return translate_event((struct NcConsole*) con, ret);
+}
+
+int console_getkey_nb(struct Console* con) {
+	int ret;
+	timeout(0); // set NCURSES getch to nonblocking
+	ret = wgetch(stdscr);
+	timeout(-1); // set NCURSES getch to blocking
+	return translate_event((struct NcConsole*) con, ret);
 }
 
 void console_sleep(struct Console* con, int ms) {
 	(void)con;
 	napms(ms);
 }
-
+/*The refresh and wrefresh routines (or wnoutrefresh and doupdate)
+ * must be called to get actual output to the terminal, 
+ * as other routines merely manipulate data structures.*/
 void console_refresh(struct Console* con) {
 	(void)con;
 	refresh();

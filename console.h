@@ -1,14 +1,15 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-typedef struct Cursor {
-	int x;
-	int y;
-} Cursor;
+#include "point.h"
+#include "console_events.h"
 
 typedef struct Console {
-	Cursor cursor;
+	point cursor;
+	mouse_event mouse;
 } Console;
+
+#include "rgb.h"
 
 /* initialize a Console struct */
 void console_init(struct Console* self);
@@ -22,11 +23,16 @@ void console_initoutput(struct Console* self);
 void console_getbounds(struct Console* self, int* width, int* height);
 void console_getcursor(struct Console* self, int* x, int* y);
 void console_goto(struct Console* self, int x, int y);
+/* prints a char and NOT advances cursor */
 void console_addchar(struct Console* self, int c, unsigned int attributes);
+/* prints a char and advances cursor */
 void console_printchar(struct Console* self, int c, unsigned int attributes);
 void console_printfxy (struct Console* con, int x, int y, const char* fmt, ...);
 void console_printf (struct Console* con, const char* fmt, ...);
+/* blocking */
 int console_getkey(struct Console* self);
+/* non-blocking */
+int console_getkey_nb(struct Console* self);
 void console_sleep(struct Console* self, int ms);
 void console_refresh(struct Console* self);
 void console_clear(struct Console* self);

@@ -16,13 +16,14 @@
 #include <leptonica/allheaders.h>
 //RcB: LINK "-llept"
 
-#include "../ncconsole.h"
+#include "../console.h"
+#include "../console_backend.h"
 #include "../../lib/include/strlib.h"
 
 int main(int argc, char** argv) {
 	char* filename;
 	int scaleFullScreen = 0;
-	NcConsole co;
+	CONSOLE co;
 	Console* t = &co.super;
 	int cx; int cy;
 	int w, h;
@@ -93,7 +94,7 @@ int main(int argc, char** argv) {
 			bufptr++;
 		}
 	}	
-	mvprintw(0,0, "%d", (int) c);
+	console_printfxy(t, 0, 0, "%d", (int) c);
 	
 	while ((c = console_getkey(t)) != 'q') {
 

@@ -13,14 +13,15 @@
 
 #include <leptonica/allheaders.h>
 
-#include "../ncconsole.h"
+#include "../console.h"
+#include "../console_backend.h"
 //#include "strlib.h"
 //RcB: LINK "-llept"
 
 int main(int argc, char** argv) {
 	char* filename;
 	int scaleFullScreen = 0;
-	NcConsole co;
+	CONSOLE co;
 	Console* t = &co.super;
 	int cx; int cy;
 	int w, h;

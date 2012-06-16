@@ -1,12 +1,13 @@
 #include <stdlib.h>
-#include "../ncconsole.h"
-#include "../ncconsole_chars.h"
+
+#include "../console.h"
+#include "../console_backend.h"
 #include "../colors.h"
 
 int main(void) {
 	static const char japh[] = "just another perl/unix hacker";
 	static const size_t jl = sizeof(japh) - 1;
-	struct NcConsole co;
+	struct CONSOLE co;
 	struct Console* c = &co.super;
 	int w, h, x, y = 0;
 	console_init(c);
@@ -77,7 +78,8 @@ int main(void) {
 	console_refresh(c);
 	console_goto(c, 20, y++);
 	for(x = 0; x < jl; x++) {
-		delay_output(rand() % 200 + 80);
+		//delay_output
+		console_sleep(c, rand() % 200 + 80);
 		console_printchar(c, japh[x], 0);
 		console_refresh(c);
 	}
