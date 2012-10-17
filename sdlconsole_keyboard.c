@@ -2,6 +2,12 @@
 #include "console_keys.h"
 #include <SDL/SDL.h>
 
+#ifdef IN_KDEVELOP_PARSER
+#define INCLUDED_FROM_SDLCONSOLE
+#endif
+
+#ifdef INCLUDED_FROM_SDLCONSOLE
+
 static int sdlkey_to_ascii(SDLConsole* c, struct SDL_keysym* key) {
 	int shift;
 	
@@ -18,6 +24,11 @@ static int sdlkey_to_ascii(SDLConsole* c, struct SDL_keysym* key) {
 	
 	printf("shift: %d, mod %d, sym %d, name %s\n", shift, key->mod, key->sym, SDL_GetKeyName(key->sym));
 	switch(shift) {
+		// alt
+		case -1:
+			if(key->sym == SDLK_RETURN)
+				sdlconsole_toggle_fullscreen(c);
+			break;
 		//ctrl
 		case -2:
 			if(c->paintmode)
@@ -250,10 +261,13 @@ static int sdlkey_to_ascii(SDLConsole* c, struct SDL_keysym* key) {
 	return 0;
 }
 
+#include "colors.h"
 static void print_all_fonts(Console* c) {
 	size_t i;
 	int x, y, w, h;
 	console_getbounds(c, &w, &h);
+	console_goto(c, 0, 0);
+	console_setcolors(c, RGB3(WHITE), RGB3(BLACK));
 	console_printf(c, "%.3d %c ", 0, ' ');
 	for(i = 1; i < 256; i++) {
 		console_getcursor(c, &x, &y);
@@ -261,6 +275,7 @@ static void print_all_fonts(Console* c) {
 			console_linebreak(c);
 		console_printf(c, "%.3d %c ", (int) i, (int) i);
 	}
+	console_draw(c);
 }
 
 static int sdlconsole_translate_event(SDLConsole* c, SDL_Event* ev) {
@@ -312,6 +327,10 @@ static int sdlconsole_translate_event(SDLConsole* c, SDL_Event* ev) {
 				case SDLK_F11:
 					return keymods | CK_F11;
 				case SDLK_F12:
+					if(keymods & CK_MOD_ALT) {
+						print_all_fonts(&c->super);
+						return CK_UNDEF;
+					}
 					return keymods | CK_F12;
 				case SDLK_RSHIFT:
 					return keymods | CK_RSHIFT;
@@ -327,6 +346,7 @@ static int sdlconsole_translate_event(SDLConsole* c, SDL_Event* ev) {
 				case SDLK_ESCAPE:
 					return keymods | CK_ESCAPE;
 				case SDLK_RETURN:
+					if(keymods & CK_MOD_ALT) sdlconsole_toggle_fullscreen(c);
 					return keymods | CK_RETURN;
 				case SDLK_BACKSPACE:
 					return keymods | CK_BACKSPACE;
@@ -378,7 +398,7 @@ static int sdlconsole_translate_event(SDLConsole* c, SDL_Event* ev) {
 			c->super.mouse.mouse_ev = ME_MOVE;
 			return CK_MOUSE_EVENT;
 		case SDL_VIDEORESIZE:
-			console_resize(c, event.resize.w, event.resize.h);
+			console_resize(&c->super, event.resize.w, event.resize.h);
 			return CK_RESIZE_EVENT;
 		default:
 			break;
@@ -386,3 +406,4 @@ static int sdlconsole_translate_event(SDLConsole* c, SDL_Event* ev) {
 	return CK_UNDEF;
 }
 
+#endif

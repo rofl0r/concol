@@ -5,7 +5,6 @@
 #include "sdlconsole.h"
 #include "rect.h"
 #include <stdarg.h>
-#include "../lib/include/strlib.h"
 
 void console_resize(Console *c, int w, int h);
 
@@ -29,7 +28,7 @@ void sdlconsole_init(SDLConsole* c, point resolution, font* fnt) {
 	screens_lock = SDL_CreateMutex();
 	
 	c->fnt = fnt;
-	console_resize(c, resolution.x, resolution.y);
+	console_resize(&c->super, resolution.x, resolution.y);
 	//c->fnt = bitfont_to_font(&int10_font_16);
 	SDL_WM_SetCaption("sdl-console", NULL);
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
@@ -45,7 +44,7 @@ void console_cleanup(Console* self) {
 void console_initoutput(Console* self) {(void) self;}
 
 void console_clear(Console* self) {
-	rect fs = {0};
+	rect fs = {{0}};
 	fs.bottomright.x = self->dim.x -1;
 	fs.bottomright.y = self->dim.y -1;
 	console_fill(self, &fs, ' ');
@@ -69,12 +68,13 @@ void console_sleep(struct Console* self, int ms) {
 	msleep(ms);
 }
 
+#define INCLUDED_FROM_SDLCONSOLE
 #include "sdlconsole_keyboard.c"
 int console_getkey_nb(Console* c) {
 	SDL_Event event;
 	/* Loop through waiting messages and process them */
 	while (SDL_PollEvent(&event)) {
-		return sdlconsole_translate_event(c, &event);
+		return sdlconsole_translate_event((struct SDLConsole*) c, &event);
 	}
 	return 1;
 }
@@ -85,7 +85,7 @@ int console_getkey(Console* c) {
 	int ret;
 	while(1)
 		while (SDL_PollEvent(&event)) {
-			ret = sdlconsole_translate_event(c, &event);
+			ret = sdlconsole_translate_event((struct SDLConsole*) c, &event);
 			if(ret != CK_UNDEF) return ret;
 			console_sleep(c, 1);
 		}
