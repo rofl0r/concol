@@ -19,9 +19,9 @@
 #include "../console.h"
 #include "../console_keys.h"
 #include "../console_backend.h"
-#include "../../lib/include/strlib.h"
+
 #if (CONSOLE_BACKEND == SDL_CONSOLE)
-#include "../fonts/testfont.h"
+#include "../fonts/allfonts.h"
 #endif
 
 int main(int argc, char** argv) {
@@ -32,9 +32,7 @@ int main(int argc, char** argv) {
 	int cx; int cy;
 	int w, h;
 	int iterX, iterY;
-	float xfactor = 1.0f;
-	float yfactor = 1.0f;
-	float factor;
+
 	struct Pix* pngfile;
 	struct Pix* ping;
 	struct Pix* palette;
@@ -61,7 +59,7 @@ int main(int argc, char** argv) {
 	console_init(t);
 #if (CONSOLE_BACKEND == SDL_CONSOLE)
 	point reso = {800, 600};
-	sdlconsole_init(&co, reso, &testfont);
+	sdlconsole_init(&co, reso, FONT);
 #endif
 
 	console_getbounds(t, &cx, &cy);
@@ -126,9 +124,11 @@ int main(int argc, char** argv) {
 					startx++;
 				break;
 			default:
+				goto loopend; // ignore mouse movement and similar stuff
 				break;
 		}
 		goto paint;
+		loopend: ;
 	}
 	
 	pixDestroy(&palette);
