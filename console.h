@@ -6,6 +6,9 @@
 #include "point.h"
 #include "rect.h"
 #include "console_events.h"
+#include "console_chars.h"
+
+#define CCT(charname) (console_chartab[charname])
 
 typedef struct Console {
 	point cursor;

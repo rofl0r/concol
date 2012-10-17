@@ -6,6 +6,8 @@
 #include "rect.h"
 #include <stdarg.h>
 
+#include "sdlconsole_chartab.c"
+
 void console_resize(Console *c, int w, int h);
 
 static SDL_mutex *screens_lock;

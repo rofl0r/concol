@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "tbconsole_chartab.c"
+
 #define ARRAY_SIZE(X) (sizeof(X) / sizeof((X)[0]))
 
 static const rgb_t tbcolors[] = {

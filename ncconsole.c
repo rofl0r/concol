@@ -23,6 +23,8 @@
 #include <stdarg.h>
 #include "console_keys.h"
 
+#include "ncconsole_chartab.c"
+
 #define MIN_COLORPAIR_NUMBER 1
 #define MIN_COLOR_NUMBER 0
 
