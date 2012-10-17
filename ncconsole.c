@@ -288,7 +288,6 @@ void console_addchar(struct Console* con, int c, unsigned int attributes) {
 void console_printchar(struct Console* con, int c, unsigned int attributes) {
 	struct NcConsole *self = (struct NcConsole*) con;
 	int newx = self->super.cursor.x == stdscr->_maxx ? 1 : self->super.cursor.x + 1;
-	//FIXME this looks like a copy paste error
 	int newy = self->super.cursor.x == stdscr->_maxx ? self->super.cursor.y + 1 : self->super.cursor.y;
 	console_addchar(con, c, attributes);
 	console_goto(con, newx, newy);
