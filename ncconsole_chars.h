@@ -56,6 +56,48 @@
 #define CC_BOARD ACS_BOARD
 #define CC_LANTERN ACS_LANTERN
 #define CC_BLOCK ACS_BLOCK
+#define CC_S3 ACS_S3
+#define CC_S7 ACS_S7
+#define CC_LEQUAL ACS_LEQUAL
+#define CC_GEQUAL ACS_GEQUAL
+#define CC_PI ACS_PI
+#define CC_NEQUAL ACS_NEQUAL
+#define CC_STERLING ACS_STERLING
+
+/* double border on vertical lines, single border on horizontal lines, like ||- */
+#define CC_ULCORNER_DV_SH 0
+#define CC_LLCORNER_DV_SH 0
+#define CC_URCORNER_DV_SH 0
+#define CC_LRCORNER_DV_SH 0
+
+#define CC_RTEE_DV_SH 0
+#define CC_LTEE_DV_SH 0
+#define CC_BTEE_DV_SH 0
+#define CC_TTEE_DV_SH 0
+
+#define CC_PLUS_DV_SH 0
+
+/* double border on horizontal lines, single border on vertical lines, like |= */
+#define CC_ULCORNER_DH_SV 0
+#define CC_LLCORNER_DH_SV 0
+#define CC_URCORNER_DH_SV 0
+#define CC_LRCORNER_DH_SV 0
+
+#define CC_RTEE_DH_SV 0
+#define CC_LTEE_DH_SV 0
+#define CC_BTEE_DH_SV 0
+#define CC_TTEE_DH_SV 0
+
+#define CC_PLUS_DH_SV 0
+
+#define CC_SHADOW_LEFT 0
+#define CC_SHADOW_RIGHT 0
+#define CC_SHADOW_TOP 0
+#define CC_SHADOW_BOTTOM 0
+
+#define CC_DOUBLE_ARROW_LT 0 /* << */
+#define CC_DOUBLE_ARROW_GT 0 /* >> */
+
 
 
 #endif
