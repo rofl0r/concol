@@ -63,6 +63,9 @@ static inline void console_inittables(struct Console* con) {
 
 void console_init(struct Console* con) {
 	struct NcConsole *self = (struct NcConsole*) con;
+	
+	ncurses_chartab_init();
+	
 	strncpy(self->org_term, getenv("TERM"), sizeof(self->org_term));
 	setenv("TERM", "xterm-256color", 1);
 	invalid_color.a = 255;
