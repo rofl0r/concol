@@ -2,43 +2,52 @@
 #include <string.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
-#include "sdlconsole.h"
+#include "console.h"
 #include "rect.h"
 #include <stdarg.h>
 
 #include "sdlconsole_chartab.c"
+
+#define SDL_mutex_lock(X) SDL_mutexP(X)
+#define SDL_mutex_unlock(X) SDL_mutexV(X)
 
 void console_resize(Console *c, int w, int h);
 
 static SDL_mutex *screens_lock;
 
 void console_init(struct Console *self) {
-	struct SDLConsole *c = (struct SDLConsole *) self;
+	struct SDLConsole *c = &self->backend.sdl;
 	c->paintmode = 0;
 	c->cursorblink = 1;
 	c->fullscreen = 0;
-	c->super.automove = 0;
-	c->super.isblinking = 0;
+	self->automove = 0;
+	self->isblinking = 0;
 	c->surface = NULL;
 }
 
-void sdlconsole_init(SDLConsole* c, point resolution, font* fnt) {
+void console_init_graphics(Console* self, point resolution, font* fnt) {
+	struct SDLConsole *c = &self->backend.sdl;
+	if(!fnt) {
+		fprintf(stderr, "fnt must not be null\n");
+		goto out;
+	}
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Could not initialize SDL: %s\n", SDL_GetError());
+		out:
 		exit(1);
 	}
 	screens_lock = SDL_CreateMutex();
 	
 	c->fnt = fnt;
-	console_resize(&c->super, resolution.x, resolution.y);
+	console_resize(self, resolution.x, resolution.y);
 	//c->fnt = bitfont_to_font(&int10_font_16);
 	SDL_WM_SetCaption("sdl-console", NULL);
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 }
 
 void console_cleanup(Console* self) {
-	struct SDLConsole *c = (struct SDLConsole *) self;
-	if(c->fullscreen) sdlconsole_toggle_fullscreen(c);
+	struct SDLConsole *c = &self->backend.sdl;
+	if(c->fullscreen) console_toggle_fullscreen(self);
 	SDL_DestroyMutex(screens_lock);
 	SDL_Quit();
 }
@@ -76,7 +85,7 @@ int console_getkey_nb(Console* c) {
 	SDL_Event event;
 	/* Loop through waiting messages and process them */
 	while (SDL_PollEvent(&event)) {
-		return sdlconsole_translate_event((struct SDLConsole*) c, &event);
+		return sdlconsole_translate_event(c, &event);
 	}
 	return 1;
 }
@@ -87,7 +96,7 @@ int console_getkey(Console* c) {
 	int ret;
 	while(1)
 		while (SDL_PollEvent(&event)) {
-			ret = sdlconsole_translate_event((struct SDLConsole*) c, &event);
+			ret = sdlconsole_translate_event(c, &event);
 			if(ret != CK_UNDEF) return ret;
 			console_sleep(c, 1);
 		}
@@ -130,12 +139,12 @@ void console_unlock(void) {
 }
 
 void console_resize(Console *self, int w, int h) {
-	struct SDLConsole *c = (struct SDLConsole *) self;
+	SDLConsole *c = &self->backend.sdl;
 	console_lock();
 	c->res.x = w;
 	c->res.y = h;
-	c->super.dim.x = w / c->fnt->dim.x;
-	c->super.dim.y = h / c->fnt->dim.y;
+	self->dim.x = w / c->fnt->dim.x;
+	self->dim.y = h / c->fnt->dim.y;
 	if(c->surface) 
 		SDL_FreeSurface(c->surface);
 	
@@ -147,7 +156,8 @@ void console_resize(Console *self, int w, int h) {
 	console_unlock();
 }
 
-void sdlconsole_toggle_fullscreen(SDLConsole* c) {
+void console_toggle_fullscreen(Console* self) {
+	SDLConsole *c = &self->backend.sdl;
 	console_lock();
 	SDL_WM_ToggleFullScreen(c->surface);
 	c->fullscreen = ~ c->fullscreen;
@@ -182,7 +192,7 @@ static sdl_rgb_tuple sdlconsole_getcolors(SDLConsole* c) {
 }
 
 rgb_tuple console_getcolors(Console* self) {
-	struct SDLConsole *c = (struct SDLConsole *) self;
+	struct SDLConsole *c = &self->backend.sdl;
 	rgb_tuple ret;
 	ret.fgcolor = srgb_to_rgb(c->color.fgcolor);
 	ret.bgcolor = srgb_to_rgb(c->color.bgcolor);
@@ -190,57 +200,57 @@ rgb_tuple console_getcolors(Console* self) {
 }
 
 int console_setcolor(struct Console* self, int is_fg, rgb_t color) {
-	struct SDLConsole *c = (struct SDLConsole *) self;
+	struct SDLConsole *c = &self->backend.sdl;
 	sdl_rgb_t* dest = is_fg ? &c->color.fgcolor : &c->color.bgcolor;
 	*dest = rgb_to_srgb(color);
 	return 1;
 }
 
 void console_refresh(Console* self) {
-	struct SDLConsole *c = (struct SDLConsole *) self;
+	struct SDLConsole *c = &self->backend.sdl;
 	console_lock();
 	SDL_UpdateRect(c->surface, 0, 0, 0, 0);
 	console_unlock();
 }
 
 void console_blink_cursor(Console* self) {
-	struct SDLConsole *c = (struct SDLConsole *) self;
-	sdl_rgb_t *ptr = (sdl_rgb_t *) c->surface->pixels;
+	struct SDLConsole *c = &self->backend.sdl;
+	sdl_rgb_t *ptr = (sdl_rgb_t *) ((SDL_Surface*) c->surface)->pixels;
 	int x, y, rx, ry, lineoffset;
 	console_lock();
-	if(c->cursorblink || c->isblinking) {
-		for (y = 0, ry = c->super.cursor.y * c->fnt->dim.y; y < c->fnt->dim.y; y++, ry += 1) {
-			for (x = 0, rx = c->super.cursor.x * c->fnt->dim.x; x < c->fnt->dim.x; x++, rx++) {
-				lineoffset = ry * (c->surface->pitch / 4);
+	if(c->cursorblink || self->isblinking) {
+		for (y = 0, ry = self->cursor.y * c->fnt->dim.y; y < c->fnt->dim.y; y++, ry += 1) {
+			for (x = 0, rx = self->cursor.x * c->fnt->dim.x; x < c->fnt->dim.x; x++, rx++) {
+				lineoffset = ry * (((SDL_Surface*) c->surface)->pitch / 4);
 				ptr[lineoffset + rx].val = ~ptr[lineoffset + rx].val;
 			}
 		}
-		SDL_UpdateRect(c->surface, c->super.cursor.x * c->fnt->dim.x ,c->super.cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
-		c->isblinking = ~c->isblinking;
+		SDL_UpdateRect(c->surface, self->cursor.x * c->fnt->dim.x ,self->cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
+		self->isblinking = ~self->isblinking;
 	}
 	console_unlock();
 }
 
 void console_putchar(Console* self, int ch, int doupdate) {
-	struct SDLConsole *c = (struct SDLConsole *) self;
+	struct SDLConsole *c = &self->backend.sdl;
 	console_unblink(self);
 	console_lock();
 	char* char_data = c->fnt->characters[ch & 0xff];
-	sdl_rgb_t *ptr = (sdl_rgb_t *) c->surface->pixels;
+	sdl_rgb_t *ptr = (sdl_rgb_t *) ((SDL_Surface*) c->surface)->pixels;
 	sdl_rgb_t *color;
 	int lineoffset;
-	int pitch_div_4 = (c->surface->pitch / 4);
+	int pitch_div_4 = (((SDL_Surface*) c->surface)->pitch / 4);
 	int x, y, rx, ry;
-	for (y = 0, ry = c->super.cursor.y * c->fnt->dim.y; y < c->fnt->dim.y; y++, ry++) {
+	for (y = 0, ry = self->cursor.y * c->fnt->dim.y; y < c->fnt->dim.y; y++, ry++) {
 		lineoffset = ry * pitch_div_4;
-		for (x = 0, rx = c->super.cursor.x * c->fnt->dim.x; x < c->fnt->dim.x; x++, rx++) {
+		for (x = 0, rx = self->cursor.x * c->fnt->dim.x; x < c->fnt->dim.x; x++, rx++) {
 			color = char_data[y * c->fnt->dim.x + x] ? &c->color.fgcolor : &c->color.bgcolor;
 			ptr[lineoffset + rx] = *color;
 		}
 	}
-	if(doupdate) SDL_UpdateRect(c->surface, c->super.cursor.x * c->fnt->dim.x ,c->super.cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
+	if(doupdate) SDL_UpdateRect(c->surface, self->cursor.x * c->fnt->dim.x ,self->cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
 	console_unlock();
-	if(c->super.automove) console_advance_cursor(self, 1);
+	if(self->automove) console_advance_cursor(self, 1);
 }
 
 

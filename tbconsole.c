@@ -1,4 +1,4 @@
-#include "tbconsole.h"
+#include "console.h"
 #include "console_keys.h"
 #include "colors.h"
 #include "../termbox/src/termbox.h"
@@ -25,7 +25,7 @@ static const rgb_t tbcolors[] = {
 
 /* initialize a Console struct */
 void console_init(struct Console* self) {
-	memset(self, 0, sizeof(struct TbConsole));
+	memset(self, 0, sizeof(struct Console));
 	tb_init();
 	tb_select_input_mode(TB_INPUT_ESC);
 	tb_clear();
@@ -35,6 +35,7 @@ void console_init(struct Console* self) {
 
 /* cleanup restores the original term behaviour and releases acquired resources. */
 void console_cleanup(struct Console* self) {
+	(void) self;
 	tb_shutdown();
 }
 
@@ -68,13 +69,13 @@ static int getNearestColor(rgb_t col) {
 }
 
 int console_setcolor(struct Console* self, int is_fg, rgb_t mycolor) {
-	struct TbConsole *c = (struct TbConsole*) self;
+	struct TbConsole *c = &self->backend.tb;
 	int *dest = is_fg ? &c->fgcolor : &c->bgcolor;
 	*dest = getNearestColor(mycolor);
 	return 1;
 }
 
-void console_initoutput(struct Console* self) {}
+void console_initoutput(struct Console* self) { (void) self; }
 
 /* get width and height of the console display (in characters) */
 void console_getbounds(struct Console* self, int* width, int* height) {
@@ -89,16 +90,16 @@ void console_goto(struct Console* self, int x, int y) {
 
 /* prints a char and NOT advances cursor */
 void console_addchar(struct Console* self, int c, unsigned int attributes) {
-	struct TbConsole *con = (struct TbConsole*) self;
+	(void) attributes;
+	struct TbConsole *con = &self->backend.tb;
 	tb_change_cell(self->cursor.x, self->cursor.y, c, con->fgcolor, con->bgcolor);
 }
 /* prints a char and advances cursor */
-void console_printchar(struct Console* con, int c, unsigned int attributes) {
-	struct TbConsole *self = (struct TbConsole*) con;
-	int newx = self->super.cursor.x == tb_width() ? 1 : self->super.cursor.x + 1;
-	int newy = self->super.cursor.x == tb_width() ? self->super.cursor.y + 1 : self->super.cursor.y;
-	console_addchar(con, c, attributes);
-	console_goto(con, newx, newy);
+void console_printchar(struct Console* self, int c, unsigned int attributes) {
+	int newx = self->cursor.x == (int) tb_width() ? 1 : self->cursor.x + 1;
+	int newy = self->cursor.x == (int) tb_width() ? self->cursor.y + 1 : self->cursor.y;
+	console_addchar(self, c, attributes);
+	console_goto(self, newx, newy);
 }
 
 void console_putchar(Console* self, int ch, int doupdate) {
@@ -174,7 +175,7 @@ static int event_to_key(int retval, struct tb_event *e) {
 	int ret = 0;
 	if (e->key >= TB_KEY_MIN) {
 		// special key
-		if(e->key - TB_KEY_MIN >= key_table_size) {
+		if(e->key - TB_KEY_MIN >= (ssize_t) key_table_size) {
 			//BUG
 			return CK_ERR;
 		}
@@ -192,6 +193,7 @@ static int event_to_key(int retval, struct tb_event *e) {
 
 /* blocking getkey */
 int console_getkey(struct Console* self) {
+	(void) self;
 	struct tb_event e;
 	int ret = tb_poll_event(&e);
 	if(ret == 0) ret = -1;
@@ -200,6 +202,7 @@ int console_getkey(struct Console* self) {
 
 /* non blocking getkey. returns -1 if no data is available */
 int console_getkey_nb(struct Console* self) {
+	(void) self;
 	struct tb_event e;
 	int ret = tb_peek_event(&e, 0);
 	if(ret == 0) ret = -1;
@@ -237,4 +240,5 @@ void console_clear(struct Console* self) {
 void console_blink_cursor(struct Console* self) { (void) self; }
 void console_lock(void) {}
 void console_unlock(void) {}
-
+void console_toggle_fullscreen(struct Console* self) { (void) self; }
+void console_init_graphics(Console* self, point resolution, font* fnt) {(void) self; (void) resolution; (void) fnt;}

@@ -8,6 +8,10 @@
 #include "console_events.h"
 #include "console_chars.h"
 
+#include "sdlconsole.h"
+#include "tbconsole.h"
+#include "ncconsole.h"
+
 #define CCT(charname) (console_chartab[charname])
 
 typedef struct Console {
@@ -16,6 +20,11 @@ typedef struct Console {
 	mouse_event mouse;
 	int automove:1; // flag which affects putchar and printf (cursor will be advanced)
 	int isblinking:1;
+	union {
+		TbConsole tb;
+		SDLConsole sdl;
+		NcConsole nc;
+	} backend;
 } Console;
 
 #include "rgb.h"
@@ -71,10 +80,14 @@ void console_cursor_left(Console* c);
 void console_cursor_right(Console* c);
 void console_unblink(Console* c);
 
+/* sdl-specific, only implemented in SDL backend. */
+void console_toggle_fullscreen(Console *c);
+/* must be called after console_init() */
+void console_init_graphics(Console* self, point resolution, font* fnt);
+
 /*
 TODO :
 
-void sdlconsole_init(sdlconsole* c, point resolution, font* fnt);
 rgb_tuple sdlconsole_getcolors(sdlconsole* c);
 void sdlconsole_putchar(sdlconsole* c, int ch, int doupdate);
 int sdlconsole_getchar(sdlconsole* c);

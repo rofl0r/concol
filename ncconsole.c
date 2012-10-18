@@ -16,7 +16,7 @@
  * 
  */
 
-#include "ncconsole.h"
+#include "console.h"
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -51,20 +51,18 @@ static inline int console_tothousand(int in) {
 	return in == 0 ? 0 : in == 255 ? 1000 : (in * 3921568) / (1000 * 1000);
 }
 
-static inline void console_inittables(struct Console* con) {
-	struct NcConsole *self = (struct NcConsole*) con;
+static inline void console_inittables(struct Console* self) {
+	struct NcConsole *con = &self->backend.nc;
 	int i;
 	for (i = 0; i < CONSOLE_COLORPAIRCOUNT; i++) {
-		self->colors[i] = invalid_color;
-		self->termPairs[i].fgcol = -1;
-		self->termPairs[i].bgcol = -1;
+		con->colors[i] = invalid_color;
+		con->termPairs[i].fgcol = -1;
+		con->termPairs[i].bgcol = -1;
 	}
 }
 
 void console_init(struct Console* con) {
-	struct NcConsole *self = (struct NcConsole*) con;
-	
-	ncurses_chartab_init();
+	struct NcConsole *self = &con->backend.nc;
 	
 	strncpy(self->org_term, getenv("TERM"), sizeof(self->org_term));
 	setenv("TERM", "xterm-256color", 1);
@@ -82,6 +80,9 @@ void console_init(struct Console* con) {
 	keypad(stdscr, TRUE);
 	nonl(); // get return key events
 	
+	// the ncurses table is apparently only initialised after initscr() oslt
+	ncurses_chartab_init();
+	
 	self->hasColors = has_colors();
 	self->canChangeColors = self->hasColors ? can_change_color() : 0;
 	if (self->hasColors) start_color();
@@ -91,7 +92,7 @@ void console_init(struct Console* con) {
 	
 	self->hasMouse = has_mouse();
 	if(self->hasMouse) {
-		self->hasMouse = mousemask(/*ALL_MOUSE_EVENTS*/ 
+		self->hasMouse = (int) mousemask(/*ALL_MOUSE_EVENTS*/ 
 			BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED |
 			BUTTON1_RELEASED | BUTTON2_RELEASED | BUTTON3_RELEASED |
 			REPORT_MOUSE_POSITION, NULL) != ERR;
@@ -114,7 +115,7 @@ void console_init(struct Console* con) {
 }
 
 void console_cleanup(struct Console* con) {
-	struct NcConsole *self = (struct NcConsole*) con;
+	struct NcConsole *self = &con->backend.nc;
 	clear();
 	refresh();
 	if (self->canChangeColors) console_restorecolors(self);
@@ -177,7 +178,7 @@ static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t
 }
 
 int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
-	struct NcConsole *self = (struct NcConsole*) con;
+	struct NcConsole *self = &con->backend.nc;
 	int i;
 	int* which = is_fg ? &self->active.fgcol : &self->active.bgcol;
 	
@@ -212,7 +213,7 @@ int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
 
 // sends the right "colorpair" to ncurses
 void console_initoutput(struct Console* con) {
-	struct NcConsole *self = (struct NcConsole*) con;
+	struct NcConsole *self = &con->backend.nc;
 	int i;
 	if (self->active.fgcol == -1) console_setcolor(con, 1, RGB(0xFF, 0xFF, 0xFF));
 	if (self->active.bgcol == -1) console_setcolor(con, 0, RGB(0, 0, 0));
@@ -252,8 +253,7 @@ static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int
 	return init_pair(pair+MIN_COLORPAIR_NUMBER, fgcol+MIN_COLOR_NUMBER, bgcol+MIN_COLOR_NUMBER) != FALSE;
 }
 
-static int console_usecolorpair(struct NcConsole* con, int pair) {
-	struct NcConsole *self = (struct NcConsole*) con;
+static int console_usecolorpair(struct NcConsole* self, int pair) {
 	if(pair >= CONSOLE_COLORPAIRCOUNT) return 0;
 	if (!self->hasColors) return 0;
 	self->lastused.fgcol = self->active.fgcol;
@@ -266,36 +266,36 @@ static int console_usecolorpair(struct NcConsole* con, int pair) {
 	return 1;
 }
 
-void console_getbounds(struct Console* con, int* x, int* y) {
-	(void)con;
+void console_getbounds(struct Console* self, int* x, int* y) {
 	if(stdscr) {
-		con->dim.x = *x = stdscr->_maxx + 1;
-		con->dim.y = *y = stdscr->_maxy + 1;
-	} else { *y = -1; *x = -1; }
+		self->dim.x = *x = stdscr->_maxx + 1;
+		self->dim.y = *y = stdscr->_maxy + 1;
+	} else { 
+		*y = -1; 
+		*x = -1; 
+	}
 }
 
-void console_goto(struct Console* con, int x, int y) {
-	struct NcConsole *self = (struct NcConsole*) con;
+void console_goto(struct Console* self, int x, int y) {
 	move(y, x);
-	self->super.cursor.x = x;
-	self->super.cursor.y = y;
+	self->cursor.x = x;
+	self->cursor.y = y;
 }
 
 // print a char at current location
-void console_addchar(struct Console* con, int c, unsigned int attributes) {
-	struct NcConsole *self = (struct NcConsole*) con;
-	console_initoutput(con);
-	waddch(stdscr, c | attributes | self->lastattr);
+void console_addchar(struct Console* self, int c, unsigned int attributes) {
+	struct NcConsole *con = &self->backend.nc;
+	console_initoutput(self);
+	waddch(stdscr, c | attributes | con->lastattr);
 	//waddch(stdscr, c | attributes);
 }
 
 // prints a char and advances cursor
-void console_printchar(struct Console* con, int c, unsigned int attributes) {
-	struct NcConsole *self = (struct NcConsole*) con;
-	int newx = self->super.cursor.x == stdscr->_maxx ? 1 : self->super.cursor.x + 1;
-	int newy = self->super.cursor.x == stdscr->_maxx ? self->super.cursor.y + 1 : self->super.cursor.y;
-	console_addchar(con, c, attributes);
-	console_goto(con, newx, newy);
+void console_printchar(struct Console* self, int c, unsigned int attributes) {
+	int newx = self->cursor.x == stdscr->_maxx ? 1 : self->cursor.x + 1;
+	int newy = self->cursor.x == stdscr->_maxx ? self->cursor.y + 1 : self->cursor.y;
+	console_addchar(self, c, attributes);
+	console_goto(self, newx, newy);
 }
 
 void console_putchar(Console* self, int ch, int doupdate) {
@@ -336,7 +336,7 @@ static int check_modifier_state(mmask_t state) {
 	return ret;
 }
 
-static int translate_event(struct NcConsole *self, int key) {
+static int translate_event(struct Console *self, int key) {
 	int ret = 0;
 	MEVENT mouse_ev;
 	
@@ -347,25 +347,25 @@ static int translate_event(struct NcConsole *self, int key) {
 				break;
 			}
 			ret = CK_MOUSE_EVENT;
-			self->super.mouse.coords.x = mouse_ev.x;
-			self->super.mouse.coords.y = mouse_ev.y;
+			self->mouse.coords.x = mouse_ev.x;
+			self->mouse.coords.y = mouse_ev.y;
 			if(mouse_ev.bstate & BUTTON1_PRESSED ||
 			   mouse_ev.bstate & BUTTON2_PRESSED ||
 			   mouse_ev.bstate & BUTTON3_PRESSED) {
-				self->super.mouse.mouse_ev = ME_BUTTON_DOWN;
-				if     (mouse_ev.bstate & BUTTON1_PRESSED) self->super.mouse.button = MB_LEFT;
-				else if(mouse_ev.bstate & BUTTON2_PRESSED) self->super.mouse.button = MB_RIGHT;
-				else if(mouse_ev.bstate & BUTTON3_PRESSED) self->super.mouse.button = MB_MIDDLE;
+				self->mouse.mouse_ev = ME_BUTTON_DOWN;
+				if     (mouse_ev.bstate & BUTTON1_PRESSED) self->mouse.button = MB_LEFT;
+				else if(mouse_ev.bstate & BUTTON2_PRESSED) self->mouse.button = MB_RIGHT;
+				else if(mouse_ev.bstate & BUTTON3_PRESSED) self->mouse.button = MB_MIDDLE;
 			} else if(mouse_ev.bstate & BUTTON1_RELEASED ||
 			          mouse_ev.bstate & BUTTON2_RELEASED ||
 			          mouse_ev.bstate & BUTTON3_RELEASED) {
-				self->super.mouse.mouse_ev = ME_BUTTON_UP;
-				if     (mouse_ev.bstate & BUTTON1_RELEASED) self->super.mouse.button = MB_LEFT;
-				else if(mouse_ev.bstate & BUTTON2_RELEASED) self->super.mouse.button = MB_RIGHT;
-				else if(mouse_ev.bstate & BUTTON3_RELEASED) self->super.mouse.button = MB_MIDDLE;
+				self->mouse.mouse_ev = ME_BUTTON_UP;
+				if     (mouse_ev.bstate & BUTTON1_RELEASED) self->mouse.button = MB_LEFT;
+				else if(mouse_ev.bstate & BUTTON2_RELEASED) self->mouse.button = MB_RIGHT;
+				else if(mouse_ev.bstate & BUTTON3_RELEASED) self->mouse.button = MB_MIDDLE;
 			} else {
-				self->super.mouse.mouse_ev = ME_MOVE;
-				self->super.mouse.button = MB_NONE;
+				self->mouse.mouse_ev = ME_MOVE;
+				self->mouse.button = MB_NONE;
 			}
 			ret |= check_modifier_state(mouse_ev.bstate);
 			break;
@@ -393,9 +393,8 @@ static int translate_event(struct NcConsole *self, int key) {
 
 /* if no input is waiting, the value ERR (-1) is returned */
 int console_getkey(struct Console* con) {
-	(void)con;
 	int ret = wgetch(stdscr);
-	return translate_event((struct NcConsole*) con, ret);
+	return translate_event(con, ret);
 }
 
 int console_getkey_nb(struct Console* con) {
@@ -403,7 +402,7 @@ int console_getkey_nb(struct Console* con) {
 	timeout(0); // set NCURSES getch to nonblocking
 	ret = wgetch(stdscr);
 	timeout(-1); // set NCURSES getch to blocking
-	return translate_event((struct NcConsole*) con, ret);
+	return translate_event(con, ret);
 }
 
 void console_sleep(struct Console* con, int ms) {
@@ -426,4 +425,6 @@ void console_clear(struct Console* con) {
 void console_blink_cursor(struct Console* self) { (void) self; }
 void console_lock(void) {}
 void console_unlock(void) {}
+void console_toggle_fullscreen(struct Console* self) { (void) self; }
+void console_init_graphics(Console* self, point resolution, font* fnt) {(void) self; (void) resolution; (void) fnt;}
 

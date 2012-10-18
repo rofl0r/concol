@@ -63,7 +63,7 @@
 #define NCCONSOLE_H_
 
 #include <stdint.h>
-#include <curses.h>
+//#include <curses.h>
 
 //RcB: LINK "-lncurses"
 //RcB: DEP "ncconsole.c"
@@ -79,14 +79,14 @@ typedef struct {
 } Colorpair;
 
 typedef struct NcConsole {
-	struct Console super;
 	char org_term[32];
 	int hasColors:1;
 	int canChangeColors:1;
 	int hasMouse:1;
 	int maxcolor;
 
-	attr_t lastattr;
+	//attr_t lastattr;
+	unsigned int lastattr;
 	Colorpair lastused;
 	Colorpair active;
 	Colorpair termPairs[CONSOLE_COLORPAIRCOUNT];

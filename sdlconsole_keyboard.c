@@ -8,7 +8,8 @@
 
 #ifdef INCLUDED_FROM_SDLCONSOLE
 
-static int sdlkey_to_ascii(SDLConsole* c, struct SDL_keysym* key) {
+static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
+	SDLConsole *c = &self->backend.sdl;
 	int shift;
 	
 	if(     (key->mod & KMOD_LSHIFT) || (key->mod & KMOD_RSHIFT))
@@ -27,7 +28,7 @@ static int sdlkey_to_ascii(SDLConsole* c, struct SDL_keysym* key) {
 		// alt
 		case -1:
 			if(key->sym == SDLK_RETURN)
-				sdlconsole_toggle_fullscreen(c);
+				console_toggle_fullscreen(self);
 			break;
 		//ctrl
 		case -2:
@@ -278,7 +279,8 @@ static void print_all_fonts(Console* c) {
 	console_draw(c);
 }
 
-static int sdlconsole_translate_event(SDLConsole* c, SDL_Event* ev) {
+static int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
+	SDLConsole* c = &self->backend.sdl;
 	int keymods;
 	SDL_Event event = *ev;
 	switch (event.type) {
@@ -328,7 +330,7 @@ static int sdlconsole_translate_event(SDLConsole* c, SDL_Event* ev) {
 					return keymods | CK_F11;
 				case SDLK_F12:
 					if(keymods & CK_MOD_ALT) {
-						print_all_fonts(&c->super);
+						print_all_fonts(self);
 						return CK_UNDEF;
 					}
 					return keymods | CK_F12;
@@ -346,7 +348,7 @@ static int sdlconsole_translate_event(SDLConsole* c, SDL_Event* ev) {
 				case SDLK_ESCAPE:
 					return keymods | CK_ESCAPE;
 				case SDLK_RETURN:
-					if(keymods & CK_MOD_ALT) sdlconsole_toggle_fullscreen(c);
+					if(keymods & CK_MOD_ALT) console_toggle_fullscreen(self);
 					return keymods | CK_RETURN;
 				case SDLK_BACKSPACE:
 					return keymods | CK_BACKSPACE;
@@ -359,46 +361,46 @@ static int sdlconsole_translate_event(SDLConsole* c, SDL_Event* ev) {
 					
 					
 				default:
-					return keymods | sdlkey_to_ascii(c, &event.key.keysym);
+					return keymods | sdlkey_to_ascii(self, &event.key.keysym);
 			}
 			break;
 		case SDL_MOUSEBUTTONUP:
 		case SDL_MOUSEBUTTONDOWN:
-			c->super.mouse.mouse_ev = (event.type == SDL_MOUSEBUTTONDOWN) ? ME_BUTTON_DOWN : ME_BUTTON_UP;
+			self->mouse.mouse_ev = (event.type == SDL_MOUSEBUTTONDOWN) ? ME_BUTTON_DOWN : ME_BUTTON_UP;
 			
 			switch(event.button.button) {
 				case SDL_BUTTON_MIDDLE:
-					c->super.mouse.button = MB_LEFT;
+					self->mouse.button = MB_LEFT;
 					break;
 				case SDL_BUTTON_RIGHT:
-					c->super.mouse.button = MB_LEFT;
+					self->mouse.button = MB_LEFT;
 					break;
 				case SDL_BUTTON_LEFT:
-					c->super.mouse.button = MB_LEFT;
+					self->mouse.button = MB_LEFT;
 					break;
 				case SDL_BUTTON_WHEELUP:
 				case SDL_BUTTON_WHEELDOWN:
-					c->super.mouse.mouse_ev = (event.button.button == SDL_BUTTON_WHEELUP) ? ME_WHEEL_UP : ME_WHEEL_DOWN;
+					self->mouse.mouse_ev = (event.button.button == SDL_BUTTON_WHEELUP) ? ME_WHEEL_UP : ME_WHEEL_DOWN;
 					break;
 				default:
-					c->super.mouse.button = MB_NONE;
+					self->mouse.button = MB_NONE;
 					break;
 			}
-			c->super.mouse.coords.x = event.button.x / c->fnt->dim.x;
-			c->super.mouse.coords.y = event.button.y / c->fnt->dim.y;
+			self->mouse.coords.x = event.button.x / c->fnt->dim.x;
+			self->mouse.coords.y = event.button.y / c->fnt->dim.y;
 			
 			return CK_MOUSE_EVENT;
 		case SDL_MOUSEMOTION:
-			if(event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT)) c->super.mouse.button = MB_LEFT;
-			else if(event.motion.state & SDL_BUTTON(SDL_BUTTON_RIGHT)) c->super.mouse.button = MB_RIGHT;
-			else if(event.motion.state & SDL_BUTTON(SDL_BUTTON_MIDDLE)) c->super.mouse.button = MB_MIDDLE;
-			else c->super.mouse.button = MB_NONE;
-			c->super.mouse.coords.x = event.motion.x / c->fnt->dim.x;
-			c->super.mouse.coords.y = event.motion.y / c->fnt->dim.y;
-			c->super.mouse.mouse_ev = ME_MOVE;
+			if(event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT)) self->mouse.button = MB_LEFT;
+			else if(event.motion.state & SDL_BUTTON(SDL_BUTTON_RIGHT)) self->mouse.button = MB_RIGHT;
+			else if(event.motion.state & SDL_BUTTON(SDL_BUTTON_MIDDLE)) self->mouse.button = MB_MIDDLE;
+			else self->mouse.button = MB_NONE;
+			self->mouse.coords.x = event.motion.x / c->fnt->dim.x;
+			self->mouse.coords.y = event.motion.y / c->fnt->dim.y;
+			self->mouse.mouse_ev = ME_MOVE;
 			return CK_MOUSE_EVENT;
 		case SDL_VIDEORESIZE:
-			console_resize(&c->super, event.resize.w, event.resize.h);
+			console_resize(self, event.resize.w, event.resize.h);
 			return CK_RESIZE_EVENT;
 		default:
 			break;

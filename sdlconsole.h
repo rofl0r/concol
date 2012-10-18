@@ -11,11 +11,9 @@
 #include "console.h"
 #include "console_events.h"
 
-#include <SDL/SDL.h>
+//#include <SDL/SDL.h>
 //RcB: LINK "-lSDL"
 
-#define SDL_mutex_lock(X) SDL_mutexP(X)
-#define SDL_mutex_unlock(X) SDL_mutexV(X)
 
 typedef union {
 	struct colors {
@@ -60,22 +58,14 @@ typedef struct {
 } sdl_rgb_tuple;
 
 typedef struct SDLConsole {
-	struct Console super;
-	SDL_Surface *surface;
+	void *surface;
 	sdl_rgb_tuple color;
 	point res;
 	font* fnt;
 	int paintmode:1;
 	int cursorblink:1;
-	int isblinking:1;
 	int fullscreen:1;
-	int automove:1; // automatically advances the cursor when putchar is called.
 } SDLConsole;
-
-// specific functions for this backend
-/* sdlconsole_init: call after console_init */
-void sdlconsole_init(struct SDLConsole* c, point resolution, font* fnt);
-void sdlconsole_toggle_fullscreen(SDLConsole* c);
 
 //RcB: DEP "sdlconsole.c"
 
