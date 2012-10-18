@@ -20,16 +20,23 @@
 //#include "strlib.h"
 //RcB: LINK "-llept"
 
+#ifndef MIN
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#endif
+
+#ifndef MAX
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+#endif
+
+
 int main(int argc, char** argv) {
 	char* filename;
 	int scaleFullScreen = 0;
 	Console co;
 	Console* t = &co;
-	int cx; int cy;
-	int w, h;
-	int iterX, iterY;
-	float xfactor = 1.0f;
-	float yfactor = 1.0f;
+	struct {int w, h;} condim;
+	struct {int w, h;} pixdim;
+	struct {float x, y;} scalefact = { 1.0, 1.0 };
 	float factor;
 	struct Pix* pngfile;
 	struct Pix* ping;
@@ -57,22 +64,22 @@ int main(int argc, char** argv) {
 	point reso = {800, 600};
 	console_init_graphics(&co, reso, FONT);
 
-	console_getbounds(t, &cx, &cy);
+	console_getbounds(t, &condim.w, &condim.h);
 
 	pngfile = pixRead(filename);
 
-	pixGetDimensions(pngfile, &w, &h, NULL);
+	pixGetDimensions(pngfile, &pixdim.w, &pixdim.h, NULL);
 
 	if(scaleFullScreen) {
-		xfactor = (cx * 1.0) / (w * 1.0);
-		yfactor = (cy * 1.0) / (h * 1.0);
-		ping = pixScale(pngfile, xfactor, yfactor);
+		scalefact.x = (condim.w * 1.0) / (pixdim.w * 2.0);
+		scalefact.y = (condim.h * 1.0) / (pixdim.h * 1.0);
+		ping = pixScale(pngfile, scalefact.x * 2.0, scalefact.y);
 	} else {
-		if (cx *2 < w) xfactor = (cx * 1.0) / (w * 1.0);
-		if (cy < h) yfactor = (cy * 1.0) / (h * 1.0);
-		factor = (xfactor < yfactor) ? xfactor: yfactor;
-		if (cx *2 < w || cy < h)
-			ping = pixScale(pngfile, factor * 2.0, factor);
+		scalefact.x = (condim.w * 1.0) / (pixdim.w * 1.0);
+		scalefact.y = (condim.h * 1.0) / (pixdim.h * 1.0);
+		factor = MIN(scalefact.x, scalefact.y);
+		if (condim.w *2 < pixdim.w || condim.h < pixdim.h)
+			ping = pixScale(pngfile, factor, factor);
 		else
 			// scale to double width so the proportion of the font is correct
 			ping = pixScale(pngfile, 2.0, 1.0 );
@@ -84,9 +91,11 @@ int main(int argc, char** argv) {
 	if (palette == NULL) { puts("palette is nul"); goto finish_him; }
 
 	pix32 = pixConvertTo32(palette);
+	pixGetDimensions(pix32, &pixdim.w, &pixdim.h, NULL);
 
-	iterX = pix32->w;
-	iterY = pix32->h;
+	int startx = 0, starty = 0;
+	int endx = startx + MIN(condim.w, pixdim.w) ;
+	int endy = starty + MIN(condim.h, pixdim.h);
 
 	int* bufptr = (int*) pix32->data;
 	if (bufptr == NULL) {
@@ -94,8 +103,8 @@ int main(int argc, char** argv) {
 		goto finish_him;
 	}
 
-	for (iy = 0; iy < iterY; iy++){
-		for (ix = 0; ix < iterX; ix++){
+	for (iy = 0; iy < endy; iy++){
+		for (ix = 0; ix < endx; ix++){
 			console_setcolor(t, 0, *((rgb_t*) bufptr));
 			console_goto(t, ix, iy);
 			console_addchar(t, ' ', 0);
