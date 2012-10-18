@@ -1,22 +1,26 @@
 #include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
 
 #include "../console.h"
-#include "../console_backend.h"
 #include "../colors.h"
-#if (CONSOLE_BACKEND == SDL_CONSOLE)
-#include "../fonts/testfont.h"
-#endif
+
+#define CONSOLE_FONT TESTFONT
+#include "../fonts/allfonts.h"
+
 int main(void) {
 	static const char japh[] = "just another perl/unix hacker";
 	static const size_t jl = sizeof(japh) - 1;
-	struct CONSOLE co;
-	struct Console* c = &co.super;
+	struct Console co;
+	struct Console* c = &co;
 	int w, h, x, y = 0;
 	console_init(c);
-#if (CONSOLE_BACKEND == SDL_CONSOLE)
+	if(getenv("CONSOLE_DEBUG"))
+		kill(getpid(), SIGSTOP);
+
 	point reso = {800, 600};
-	sdlconsole_init(&co, reso, &testfont);
-#endif
+	console_init_graphics(&co, reso, FONT);
+	
 	console_getbounds(c, &w, &h);
 	//console_setcolors(c, RGB(200, 80, 200), RGB(80, 80, 80));
 	console_setcolors(c, RGB3(BLACK), RGB3(ORANGE));
@@ -30,7 +34,7 @@ int main(void) {
 	for(y = 1; y < h - 1; y++) {
 		for(x = 0; x < w; x++) {
 			console_goto(c, x, y);
-			console_addchar(c, CC_CKBOARD, 0);
+			console_addchar(c, CCT(cc_ckboard), 0);
 		}
 	}
 	y = h - 1;
@@ -45,42 +49,47 @@ int main(void) {
 	y = 15;
 
 	console_goto(c, 20, y++);
-	console_printchar(c, CC_ULCORNER, 0);
-	console_printchar(c, CC_HLINE, 0);console_printchar(c, CC_HLINE, 0);
-	console_printchar(c, CC_HLINE, 0);console_printchar(c, CC_HLINE, 0);
-	console_printchar(c, CC_HLINE, 0);console_printchar(c, CC_HLINE, 0);
-	console_printchar(c, CC_HLINE, 0);console_printchar(c, CC_HLINE, 0);
-	console_printchar(c, CC_URCORNER, 0);
+	console_printchar(c, CCT(cc_ulcorner), 0);
+	console_printchar(c, CCT(cc_hline), 0);console_printchar(c, CCT(cc_hline), 0);
+	console_printchar(c, CCT(cc_hline), 0);console_printchar(c, CCT(cc_hline), 0);
+	console_printchar(c, CCT(cc_hline), 0);console_printchar(c, CCT(cc_hline), 0);
+	console_printchar(c, CCT(cc_hline), 0);console_printchar(c, CCT(cc_hline), 0);
+	console_printchar(c, CCT(cc_urcorner), 0);
 	
 	console_goto(c, 20, y++);
-	console_printchar(c, CC_VLINE, 0);
+	console_printchar(c, CCT(cc_vline), 0);
 	for(x=0; x<8; x++)
 		console_printchar(c, ' ', 0);
-	console_printchar(c, CC_VLINE, 0);
+	console_printchar(c, CCT(cc_vline), 0);
+	
 	
 	console_goto(c, 20, y++);
-	console_printchar(c, CC_LLCORNER, 0);
-	console_printchar(c, CC_HLINE, 0);console_printchar(c, CC_HLINE, 0);
-	console_printchar(c, CC_HLINE, 0);console_printchar(c, CC_HLINE, 0);
-	console_printchar(c, CC_HLINE, 0);console_printchar(c, CC_HLINE, 0);
-	console_printchar(c, CC_HLINE, 0);console_printchar(c, CC_HLINE, 0);
-	console_printchar(c, CC_LRCORNER, 0);
+	console_printchar(c, CCT(cc_llcorner), 0);
+	console_printchar(c, CCT(cc_hline), 0);console_printchar(c, CCT(cc_hline), 0);
+	console_printchar(c, CCT(cc_hline), 0);console_printchar(c, CCT(cc_hline), 0);
+	console_printchar(c, CCT(cc_hline), 0);console_printchar(c, CCT(cc_hline), 0);
+	console_printchar(c, CCT(cc_hline), 0);console_printchar(c, CCT(cc_hline), 0);
+	console_printchar(c, CCT(cc_lrcorner), 0);
 	y++;
-	console_goto(c, 20, y++);
-	console_printchar(c, CC_RTEE, 0);console_printchar(c, CC_LTEE, 0);
-	console_printchar(c, CC_BTEE, 0);console_printchar(c, CC_TTEE, 0);
-	console_printchar(c, CC_PLUS, 0);console_printchar(c, CC_S1, 0);
-	console_printchar(c, CC_S9, 0);console_printchar(c, CC_DIAMOND, 0);
 	
 	console_goto(c, 20, y++);
-	console_printchar(c, CC_CKBOARD, 0);console_printchar(c, CC_DEGREE, 0);
-	console_printchar(c, CC_PLMINUS, 0);console_printchar(c, CC_BULLET, 0);
-	console_printchar(c, CC_LARROW, 0);console_printchar(c, CC_RARROW, 0);
-	console_printchar(c, CC_DARROW, 0);console_printchar(c, CC_UARROW, 0);
+	console_printchar(c, CCT(cc_rtee), 0);console_printchar(c, CCT(cc_ltee), 0);
+	console_printchar(c, CCT(cc_btee), 0);console_printchar(c, CCT(cc_ttee), 0);
+	console_printchar(c, CCT(cc_plus), 0);console_printchar(c, CCT(cc_s1), 0);
+	console_printchar(c, CCT(cc_s9), 0);console_printchar(c, CCT(cc_diamond), 0);
+	/* 
+	console_goto(c, 20, y++);
+	console_printchar(c, CCT(cc_ckboard), 0);console_printchar(c, CCT(cc_degree), 0);
+	console_printchar(c, CCT(cc_plminus), 0);console_printchar(c, CCT(cc_bullet), 0);
+	console_printchar(c, CCT(cc_larrow), 0);console_printchar(c, CCT(cc_rarrow), 0);
+	console_printchar(c, CCT(cc_darrow), 0);console_printchar(c, CCT(cc_uarrow), 0);
+	
 
 	console_goto(c, 20, y++);
-	console_printchar(c, CC_BOARD, 0);console_printchar(c, CC_LANTERN, 0);
-	console_printchar(c, CC_BLOCK, 0);
+	console_printchar(c, CCT(cc_board), 0);console_printchar(c, CCT(cc_lantern), 0);
+	console_printchar(c, CCT(cc_block), 0);
+	*/
+	
 	console_refresh(c);
 	console_goto(c, 20, y++);
 	for(x = 0; x < jl; x++) {
