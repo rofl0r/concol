@@ -1,6 +1,7 @@
 #need to set BACKEND to either termbox, ncurses, or sdl
 
-LIBNAME=libconcol256
+LIBBASENAME=concol256
+LIBNAME=lib$(LIBBASENAME)
 
 LINKLIBS_TERMBOX="-ltermbox"
 LINKLIBS_SDL="-lSDL"
@@ -13,6 +14,16 @@ CFLAGS_OPT_AGGRESSIVE=-O3 -s -flto -fwhole-program
 
 DYNEXT=.so
 STAEXT=.a
+
+TEST=examples/console_test
+TESTO=$(TEST).o
+
+CONPIX=examples/console_conpix
+CONPIXO=$(CONPIX).o
+
+CONPIXS=examples/console_conpix_scroll
+CONPIXSO=$(CONPIXS).o
+
 
 -include config.mak
 
@@ -41,16 +52,26 @@ endif
 #endif
 
 
-SRCS=console.c $(BACKEND_SRCS)
+SRCS=console.c fonts/testfont.c fonts/dosfonts.c fonts/bitfont.c $(BACKEND_SRCS)
 OBJS=$(SRCS:.c=.o)
 
 
 all: $(STALIB) $(DYNLIB) $(MAINLIB)
 
+clean-symlink:
+	rm -f $(MAINLIB)
+
+clean-all:
+	rm -f *.a
+	rm -f *.so
+	rm -f *.o
+	rm -f examples/*.o
+	rm -f fonts/*.o
+
 clean:
 	rm -f $(DYNLIB)
 	rm -f $(STALIB)
-	rm -f *.o
+	rm -f $(OBJS)
 
 $(STALIB): $(OBJS)
 	ar rc $@ $(OBJS)
@@ -65,5 +86,17 @@ $(MAINLIB): $(DYNLIB)
 
 %.o: %.c
 	$(CC) -fPIC $(CPPFLAGS) $(CFLAGS) $(INC) -c -o $@ $<
+
+test: $(TESTO)
+	$(CC) $(CFLAGS) -o $(TEST) $(TESTO) -L. -l$(LIBBASENAME)
+
+conpix: $(CONPIXO)
+	$(CC) $(CFLAGS) -o $(CONPIX) $(CONPIXO) -L. -l$(LIBBASENAME) -llept
+
+conpix-scroll: $(CONPIXSO)
+	$(CC) $(CFLAGS) -o $(CONPIXS) $(CONPIXSO) -L. -l$(LIBBASENAME) -llept
+
+examples: test conpix conpix-scroll
+
 
 .PHONY: all

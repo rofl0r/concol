@@ -14,18 +14,17 @@
 #include <leptonica/allheaders.h>
 
 #include "../console.h"
-#include "../console_backend.h"
-#if (CONSOLE_BACKEND == SDL_CONSOLE)
+#define CONSOLE_FONT TESTFONT
+
 #include "../fonts/allfonts.h"
-#endif
 //#include "strlib.h"
 //RcB: LINK "-llept"
 
 int main(int argc, char** argv) {
 	char* filename;
 	int scaleFullScreen = 0;
-	CONSOLE co;
-	Console* t = &co.super;
+	Console co;
+	Console* t = &co;
 	int cx; int cy;
 	int w, h;
 	int iterX, iterY;
@@ -55,10 +54,8 @@ int main(int argc, char** argv) {
 	}
 
 	console_init(t);
-#if (CONSOLE_BACKEND == SDL_CONSOLE)
 	point reso = {800, 600};
-	sdlconsole_init(&co, reso, FONT);
-#endif
+	console_init_graphics(&co, reso, FONT);
 
 	console_getbounds(t, &cx, &cy);
 
