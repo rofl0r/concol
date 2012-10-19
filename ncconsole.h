@@ -63,10 +63,13 @@
 #define NCCONSOLE_H_
 
 #include <stdint.h>
-//#include <curses.h>
 
+//RcB: SKIPON "CONSOLE_BACKEND=SDL_CONSOLE"
+//RcB: SKIPON "CONSOLE_BACKEND=TERMBOX_CONSOLE"
 //RcB: LINK "-lncurses"
 //RcB: DEP "ncconsole.c"
+//RcB: SKIPOFF "CONSOLE_BACKEND=SDL_CONSOLE"
+//RcB: SKIPOFF "CONSOLE_BACKEND=TERMBOX_CONSOLE"
 
 #include "rgb.h"
 #include "console.h"

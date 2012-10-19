@@ -14,6 +14,10 @@
 
 #define CCT(charname) (console_chartab[charname])
 
+#ifdef CONSOLE_FONT
+#include "fonts/allfonts.h"
+#endif
+
 enum ConsoleBackend {
 	cb_sdl = 0,
 	cb_ncurses,

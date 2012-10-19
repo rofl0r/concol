@@ -7,7 +7,12 @@
 #include <stdarg.h>
 
 #include "sdlconsole_chartab.c"
+
+//RcB: SKIPON CONSOLE_FONT
+#ifndef CONSOLE_FONT
 #include "fonts/testfont.h"
+#endif
+//RcB: SKIPOFF CONSOLE_FONT
 
 #define SDL_mutex_lock(X) SDL_mutexP(X)
 #define SDL_mutex_unlock(X) SDL_mutexV(X)
@@ -30,7 +35,9 @@ void console_init(struct Console *self) {
 
 void console_init_graphics(Console* self, point resolution, font* fnt) {
 	struct SDLConsole *c = &self->backend.sdl;
+#ifndef CONSOLE_FONT
 	if(!fnt) fnt = &testfont;
+#endif
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Could not initialize SDL: %s\n", SDL_GetError());
 		exit(1);

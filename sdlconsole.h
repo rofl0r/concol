@@ -7,12 +7,15 @@
 #include "point.h"
 #include "rect.h"
 #include "fonts/font.h"
-#include "fonts/bitfont.h"
 #include "console.h"
 #include "console_events.h"
 
-//#include <SDL/SDL.h>
+//RcB: SKIPON "CONSOLE_BACKEND=TERMBOX_CONSOLE"
+//RcB: SKIPON "CONSOLE_BACKEND=NCURSES_CONSOLE"
 //RcB: LINK "-lSDL"
+//RcB: DEP "sdlconsole.c"
+//RcB: SKIPOFF "CONSOLE_BACKEND=TERMBOX_CONSOLE"
+//RcB: SKIPOFF "CONSOLE_BACKEND=NCURSES_CONSOLE"
 
 
 typedef union {
@@ -66,7 +69,5 @@ typedef struct SDLConsole {
 	int cursorblink:1;
 	int fullscreen:1;
 } SDLConsole;
-
-//RcB: DEP "sdlconsole.c"
 
 #endif

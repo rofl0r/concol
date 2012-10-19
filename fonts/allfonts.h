@@ -9,6 +9,10 @@
 #define INT10FONT14 (BITFONT_START + 1)
 #define INT10FONT16 (BITFONT_START + 2)
 
+/* for usage with rcb you need to set -DCONSOLE_FONT=INT10FONT14
+ * or another one while compiling. this will get the right headers
+ * and the c files they link to, to be added to the build */
+
 #if (CONSOLE_FONT==TESTFONT)
 //RcB: SKIPON "CONSOLE_FONT=INT10FONT"
 #  include "testfont.h"
