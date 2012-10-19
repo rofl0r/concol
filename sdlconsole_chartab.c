@@ -2,6 +2,7 @@
 
 unsigned int console_chartab[CC_MAX] = {
 	[cc_block] = 219,
+	/* 176 - 178 are some kind of CKBOARD */
 	[cc_board] = 0,
 	[cc_btee] = 193,
 	[cc_btee_d] = 202,

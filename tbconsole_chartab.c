@@ -1,6 +1,20 @@
 #include "console_chars.h"
 
+/* 
+ * http://dev.networkerror.org/utf8/?start=9600&end=10400&cols=4&show_uni_int=on&show_uni_hex=on&show_html_ent=on&show_raw_hex=on&show_raw_bin=on
+ * 
+ * zodiac ~ 0x2648 *
+ * chess figures 0x2654
+ * "ok" and "chancel" 0x2713
+ * crosses and stars 0x2719
+ * skull, radioactive, ... 0x2620
+ */
+
+/* single border :
+ * different flavors until incl 0x250f */
+
 unsigned int console_chartab[CC_MAX] = {
+	/* maybe 2588 */
 	[cc_block] = 0x2593U,
 	[cc_board] = 0,
 	[cc_btee] = 0x2534U,
@@ -12,6 +26,7 @@ unsigned int console_chartab[CC_MAX] = {
 	[cc_darrow] = 0x2193U,
 	[cc_degree] = 0xB0,
 	[cc_diamond] = 0,
+	/* alternatives 0x226a/b */
 	[cc_double_arrow_gt] = 0xbbU,
 	[cc_double_arrow_lt] = 0xabU,
 	[cc_gequal] = 0x2265U,
