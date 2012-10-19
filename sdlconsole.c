@@ -55,7 +55,7 @@ void console_cleanup(Console* self) {
 void console_initoutput(Console* self) {(void) self;}
 
 void console_clear(Console* self) {
-	rect fs = {{0}};
+	rect fs = rect_zero;
 	fs.bottomright.x = self->dim.x -1;
 	fs.bottomright.y = self->dim.y -1;
 	console_fill(self, &fs, ' ');
@@ -185,10 +185,6 @@ static inline rgb_t srgb_to_rgb(sdl_rgb_t col) {
 	ret.g = col.colors.g;
 	ret.b = col.colors.b;
 	return ret;
-}
-
-static sdl_rgb_tuple sdlconsole_getcolors(SDLConsole* c) {
-	return c->color;
 }
 
 rgb_tuple console_getcolors(Console* self) {

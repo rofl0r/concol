@@ -8,6 +8,8 @@ typedef struct {
 	point bottomright;
 } rect;
 
+#define rect_zero {{0,0},{0,0}}
+
 #define width_from_rect(RECT_PTR) ((RECT_PTR)->bottomright.x + 1 - (RECT_PTR)->topleft.x)
 #define height_from_rect(RECT_PTR) ((RECT_PTR)->bottomright.y + 1 - (RECT_PTR)->topleft.y)
 #define make_rect(RECT_PTR, X1, Y1, X2, Y2) do { (RECT_PTR)->topleft.x = X1; (RECT_PTR)->topleft.y = Y1; \
