@@ -114,3 +114,6 @@ void console_printf(Console* c, const char* fmt, ...) {
 	}
 }
 
+enum ConsoleBackend console_getbackendtype(Console *c) {
+	return c->backendtype;
+}

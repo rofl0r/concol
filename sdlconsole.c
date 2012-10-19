@@ -17,6 +17,8 @@ void console_resize(Console *c, int w, int h);
 static SDL_mutex *screens_lock;
 
 void console_init(struct Console *self) {
+	memset(self, 0, sizeof(struct Console));
+	self->backendtype = cb_sdl;
 	struct SDLConsole *c = &self->backend.sdl;
 	c->paintmode = 0;
 	c->cursorblink = 1;

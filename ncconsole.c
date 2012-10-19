@@ -62,6 +62,9 @@ static inline void console_inittables(struct Console* self) {
 }
 
 void console_init(struct Console* con) {
+	memset(con, 0, sizeof(struct Console));
+	con->backendtype = cb_ncurses;
+
 	struct NcConsole *self = &con->backend.nc;
 	
 	strncpy(self->org_term, getenv("TERM"), sizeof(self->org_term));

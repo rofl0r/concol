@@ -26,6 +26,7 @@ static const rgb_t tbcolors[] = {
 /* initialize a Console struct */
 void console_init(struct Console* self) {
 	memset(self, 0, sizeof(struct Console));
+	self->backendtype = cb_termbox;
 	tb_init();
 	tb_select_input_mode(TB_INPUT_ESC);
 	tb_clear();

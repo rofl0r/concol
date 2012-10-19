@@ -152,7 +152,14 @@ typedef struct NcConsole {
 	short int org_bgcolors[256];
 } NcConsole;
 
+enum ConsoleBackend {
+	cb_sdl = 0,
+	cb_ncurses,
+	cb_termbox,
+};
+
 typedef struct Console {
+	enum ConsoleBackend backendtype;
 	point cursor;
 	point dim; //dimensions
 	mouse_event mouse;
@@ -200,6 +207,7 @@ void console_cursor_down(Console* c);
 void console_cursor_left(Console* c);
 void console_cursor_right(Console* c);
 void console_unblink(Console* c);
+enum ConsoleBackend console_getbackendtype(Console *c);
 void console_toggle_fullscreen(Console *c);
 void console_init_graphics(Console* self, point resolution, font* fnt);
 
