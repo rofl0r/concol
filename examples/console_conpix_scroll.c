@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 				if(starty > 0) starty--;
 				break;
 			case CK_CURSOR_DOWN:
-				if(starty < pix32->h - cy)
+				if(starty < (int) pix32->h - cy)
 					starty++;
 				break;
 			case CK_CURSOR_LEFT:
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
 					startx--;
 				break;
 			case CK_CURSOR_RIGHT:
-				if(startx < pix32->w - cx)
+				if(startx < (int) pix32->w - cx)
 					startx++;
 				break;
 			default:

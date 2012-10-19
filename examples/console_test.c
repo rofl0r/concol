@@ -92,7 +92,7 @@ int main(void) {
 	
 	console_refresh(c);
 	console_goto(c, 20, y++);
-	for(x = 0; x < jl; x++) {
+	for(x = 0; (unsigned) x < jl; x++) {
 		//delay_output
 		console_sleep(c, rand() % 200 + 80);
 		console_printchar(c, japh[x], 0);
