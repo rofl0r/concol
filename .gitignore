@@ -6,3 +6,7 @@
 *.lo
 *.so
 config.mak
+examples/console_conpix
+examples/console_conpix_scroll
+examples/console_test
+
