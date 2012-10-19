@@ -1,6 +1,6 @@
 #include "console_chars.h"
 
-unsigned int console_chartab[CC_MAX] = {
+const unsigned int console_chartab[CC_MAX] = {
 	[cc_block] = 219,
 	/* 176 - 178 are some kind of CKBOARD */
 	[cc_board] = 0,

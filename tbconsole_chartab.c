@@ -13,7 +13,7 @@
 /* single border :
  * different flavors until incl 0x250f */
 
-unsigned int console_chartab[CC_MAX] = {
+const unsigned int console_chartab[CC_MAX] = {
 	/* maybe 2588 */
 	[cc_block] = 0x2593U,
 	[cc_board] = 0,

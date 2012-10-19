@@ -33,7 +33,7 @@ STALIB=$(OUTLIB)$(STAEXT)
 MAINLIB=$(LIBNAME)$(DYNEXT)
 
 ifeq ($(BACKEND),termbox)
-	BACKEND_SRCS=tbconsole.c
+	BACKEND_SRCS=tbconsole.c tbconsole_chartab.c
 	LINKLIBS=$(LINKLIBS_TERMBOX)
 else 
 	ifeq ($(BACKEND),ncurses)
@@ -41,7 +41,7 @@ else
 		LINKLIBS=$(LINKLIBS_NCURSES)
 	else
 		ifeq ($(BACKEND),sdl)
-			BACKEND_SRCS=sdlconsole.c
+			BACKEND_SRCS=sdlconsole.c sdlconsole_chartab.c
 			LINKLIBS=$(LINKLIBS_SDL)
 		endif
 	endif

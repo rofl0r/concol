@@ -12,6 +12,7 @@
 #include "tbconsole.h"
 #include "ncconsole.h"
 
+extern unsigned int console_chartab[CC_MAX];
 #define CCT(charname) (console_chartab[charname])
 
 #ifdef CONSOLE_FONT

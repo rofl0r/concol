@@ -100,6 +100,4 @@ enum {
 	CC_MAX
 } console_chars;
 
-extern unsigned int console_chartab[CC_MAX];
-
 #endif
