@@ -237,7 +237,7 @@ void console_putchar(Console* self, int ch, int doupdate) {
 	struct SDLConsole *c = &self->backend.sdl;
 	console_unblink(self);
 	console_lock();
-	char* char_data = c->fnt->characters[ch & 0xff];
+	char* char_data = font_get_char(c->fnt, ch & 0xff);
 	sdl_rgb_t *ptr = (sdl_rgb_t *) ((SDL_Surface*) c->surface)->pixels;
 	sdl_rgb_t *color;
 	int lineoffset;

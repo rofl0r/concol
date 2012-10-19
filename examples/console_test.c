@@ -5,7 +5,8 @@
 #include "../console.h"
 #include "../colors.h"
 
-#define CONSOLE_FONT TESTFONT
+//#define CONSOLE_FONT TESTFONT
+#define CONSOLE_FONT INT10FONT08
 #include "../fonts/allfonts.h"
 
 int main(void) {
