@@ -7,6 +7,7 @@
 #include <stdarg.h>
 
 #include "sdlconsole_chartab.c"
+#include "fonts/testfont.h"
 
 #define SDL_mutex_lock(X) SDL_mutexP(X)
 #define SDL_mutex_unlock(X) SDL_mutexV(X)
@@ -27,13 +28,9 @@ void console_init(struct Console *self) {
 
 void console_init_graphics(Console* self, point resolution, font* fnt) {
 	struct SDLConsole *c = &self->backend.sdl;
-	if(!fnt) {
-		fprintf(stderr, "fnt must not be null\n");
-		goto out;
-	}
+	if(!fnt) fnt = &testfont;
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Could not initialize SDL: %s\n", SDL_GetError());
-		out:
 		exit(1);
 	}
 	screens_lock = SDL_CreateMutex();
