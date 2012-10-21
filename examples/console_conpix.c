@@ -14,6 +14,8 @@
 #include <leptonica/allheaders.h>
 
 #include "../console.h"
+#include "../console_keys.h"
+
 #define CONSOLE_FONT TESTFONT
 
 #include "../fonts/allfonts.h"
@@ -117,7 +119,7 @@ int main(int argc, char** argv) {
 	console_refresh(t);
 	
 	finish_him:
-	console_getkey(t);
+	while(console_getkey(t) & CK_EVENT_MASK);
 	
 	console_cleanup(t);
 

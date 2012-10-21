@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "../console.h"
+#include "../console_keys.h"
 #include "../colors.h"
 
 //#define CONSOLE_FONT TESTFONT
@@ -102,7 +103,7 @@ int main(void) {
 	
 	console_refresh(c);
 	
-	console_getkey(c);
+	while(console_getkey(c) & CK_EVENT_MASK);
 	console_clear(c);
 	console_cleanup(c);
 	return 0;
