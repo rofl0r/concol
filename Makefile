@@ -3,9 +3,9 @@
 LIBBASENAME=concol256
 LIBNAME=lib$(LIBBASENAME)
 
-LINKLIBS_TERMBOX="-ltermbox"
-LINKLIBS_SDL="-lSDL"
-LINKLIBS_NCURSES="-lncurses"
+LINKLIBS_TERMBOX=-ltermbox
+LINKLIBS_SDL=-lSDL
+LINKLIBS_NCURSES=-lncurses -lpthread
 
 CFLAGS_OWN=-Wall -Wextra -static -std=c99
 CFLAGS_DBG=-g -O0

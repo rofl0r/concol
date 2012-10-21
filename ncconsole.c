@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <signal.h>
 #include "console_keys.h"
 
 #include "ncconsole_chartab.c"
@@ -41,7 +42,19 @@ static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t
 static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int bgcol);
 static int console_usecolorpair(struct NcConsole* self, int pair);
 
+#include <pthread.h>
+//RcB: LINK "-lpthread"
 
+static pthread_mutex_t resize_mutex;
+static int got_resize_signal = 0;
+
+/* sigwinch signal handler */
+static void resized(int dummy) {
+	(void) dummy;
+	pthread_mutex_lock(&resize_mutex);
+	got_resize_signal = 1;
+	pthread_mutex_unlock(&resize_mutex);
+}
 
 static inline int console_fromthousand(int in) {
 	return in == 0 ? 0 : in == 1000 ? 255 : (in * 1000 * 1000) / 3921568;
@@ -64,6 +77,7 @@ static inline void console_inittables(struct Console* self) {
 void console_init(struct Console* con) {
 	memset(con, 0, sizeof(struct Console));
 	con->backendtype = cb_ncurses;
+	pthread_mutex_init(&resize_mutex, NULL);
 
 	struct NcConsole *self = &con->backend.nc;
 	
@@ -118,6 +132,8 @@ void console_init(struct Console* con) {
 	
 	con->dim.x = stdscr->_maxx + 1;
 	con->dim.y = stdscr->_maxy + 1;
+	
+	signal(SIGWINCH, resized);
 }
 
 void console_cleanup(struct Console* con) {
@@ -130,6 +146,7 @@ void console_cleanup(struct Console* con) {
 	fclose(dbg);
 #endif
 	setenv("TERM", self->org_term, 1);
+	pthread_mutex_destroy(&resize_mutex);
 }
 
 static void console_savecolors(struct NcConsole *self) {
@@ -343,7 +360,7 @@ static int check_modifier_state(mmask_t state) {
 }
 
 static int translate_event(struct Console *self, int key) {
-	int ret = 0;
+	int ret = CK_UNDEF;
 	MEVENT mouse_ev;
 	
 	switch(key) {
@@ -406,8 +423,25 @@ static int translate_event(struct Console *self, int key) {
 	return ret;
 }
 
+#include <stropts.h>
+#include <sys/ioctl.h>
+static int deal_with_resize_signal(void) {
+	struct winsize termSize;
+	int ret = 0;
+	pthread_mutex_lock(&resize_mutex);
+	if(got_resize_signal) {
+		if(ioctl(STDIN_FILENO, TIOCGWINSZ, (char *) &termSize) >= 0)
+			resize_term((int)termSize.ws_row, (int)termSize.ws_col);
+		ret = 1;
+		got_resize_signal = 0;
+	}
+	pthread_mutex_unlock(&resize_mutex);
+	return ret;
+}
+
 /* if no input is waiting, the value ERR (-1) is returned */
 int console_getkey(struct Console* con) {
+	if(deal_with_resize_signal()) return CK_RESIZE_EVENT;
 	int ret = wgetch(stdscr);
 	int res = translate_event(con, ret);
 #ifdef CONSOLE_DEBUG
@@ -417,6 +451,7 @@ int console_getkey(struct Console* con) {
 }
 
 int console_getkey_nb(struct Console* con) {
+	if(deal_with_resize_signal()) return CK_RESIZE_EVENT;
 	int ret;
 	timeout(0); // set NCURSES getch to nonblocking
 	ret = wgetch(stdscr);
