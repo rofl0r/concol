@@ -86,6 +86,11 @@ void console_init(struct Console* con) {
 	// the ncurses table is apparently only initialised after initscr() oslt
 	ncurses_chartab_init();
 	
+#ifdef CONSOLE_DEBUG
+	dbg = fopen("console.log", "w");
+#endif
+
+	
 	self->hasColors = has_colors();
 	self->canChangeColors = self->hasColors ? can_change_color() : 0;
 	if (self->hasColors) start_color();
@@ -93,14 +98,17 @@ void console_init(struct Console* con) {
 	if (self->canChangeColors)
 		console_savecolors(self);
 	
-	self->hasMouse = has_mouse();
-	if(self->hasMouse) {
-		self->hasMouse = (int) mousemask(/*ALL_MOUSE_EVENTS*/ 
-			BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED |
-			BUTTON1_RELEASED | BUTTON2_RELEASED | BUTTON3_RELEASED |
-			REPORT_MOUSE_POSITION, NULL) != ERR;
-	}
-	
+	if((self->hasMouse = (mousemask(ALL_MOUSE_EVENTS |  
+		BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED |
+		BUTTON1_RELEASED | BUTTON2_RELEASED | BUTTON3_RELEASED |
+		REPORT_MOUSE_POSITION | BUTTON_SHIFT | BUTTON_ALT | BUTTON_CTRL,
+		NULL) != (mmask_t) ERR))) 
+		mouseinterval(0) /* prevent ncurses from making click events.
+		this way we always get an event for buttondown and up. 
+		we won't get any mouse movement events either way. */;
+#ifdef CONSOLE_DEBUG
+	fprintf(dbg, "hasmouse: %d\n", (int) self->hasMouse);
+#endif
 	self->lastattr = 0;
 	
 	self->maxcolor = 0;
@@ -110,11 +118,6 @@ void console_init(struct Console* con) {
 	
 	con->dim.x = stdscr->_maxx + 1;
 	con->dim.y = stdscr->_maxy + 1;
-	
-#ifdef CONSOLE_DEBUG	
-	dbg = fopen("console.log", "w");
-#endif	
-	
 }
 
 void console_cleanup(struct Console* con) {
@@ -186,7 +189,7 @@ int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
 	int* which = is_fg ? &self->active.fgcol : &self->active.bgcol;
 	
 #ifdef CONSOLE_DEBUG
-	if(dbg) fprintf(dbg, "setcolor: (%d, %d, %d), fg: %d\n", mycolor.r, mycolor.g, mycolor.b, fg);
+	if(dbg) fprintf(dbg, "setcolor: (%d, %d, %d), fg: %d\n", mycolor.r, mycolor.g, mycolor.b, is_fg);
 #endif
 	
 	
@@ -366,10 +369,19 @@ static int translate_event(struct Console *self, int key) {
 				if     (mouse_ev.bstate & BUTTON1_RELEASED) self->mouse.button = MB_LEFT;
 				else if(mouse_ev.bstate & BUTTON2_RELEASED) self->mouse.button = MB_RIGHT;
 				else if(mouse_ev.bstate & BUTTON3_RELEASED) self->mouse.button = MB_MIDDLE;
+			} else if(mouse_ev.bstate & (1 << 28)) {
+				// ncurses 5.7 - 5.9 wrongly reports button up events as BUTTON5_TRIPLE_CLICKED
+				// keep current button
+				self->mouse.mouse_ev = ME_BUTTON_UP;
 			} else {
 				self->mouse.mouse_ev = ME_MOVE;
 				self->mouse.button = MB_NONE;
 			}
+#ifdef CONSOLE_DEBUG
+			fprintf(dbg, "x: %d, y:%d, button: %d, ev: %d, stage: %ld\n", 
+			       self->mouse.coords.x, self->mouse.coords.y, self->mouse.button,
+			       self->mouse.mouse_ev, (long) mouse_ev.bstate);
+#endif
 			ret |= check_modifier_state(mouse_ev.bstate);
 			break;
 		case KEY_RESIZE:
@@ -397,7 +409,11 @@ static int translate_event(struct Console *self, int key) {
 /* if no input is waiting, the value ERR (-1) is returned */
 int console_getkey(struct Console* con) {
 	int ret = wgetch(stdscr);
-	return translate_event(con, ret);
+	int res = translate_event(con, ret);
+#ifdef CONSOLE_DEBUG
+	fprintf(dbg, "getkey res: %d\n", res);
+#endif
+	return res;
 }
 
 int console_getkey_nb(struct Console* con) {
