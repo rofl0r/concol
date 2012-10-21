@@ -93,7 +93,7 @@ int console_getkey_nb(Console* c) {
 	while (SDL_PollEvent(&event)) {
 		return sdlconsole_translate_event(c, &event);
 	}
-	return 1;
+	return CK_UNDEF;
 }
 
 int console_getkey(Console* c) {
@@ -106,7 +106,7 @@ int console_getkey(Console* c) {
 			if(ret != CK_UNDEF) return ret;
 			console_sleep(c, 1);
 		}
-	return 1;
+	return CK_UNDEF;
 }
 
 
