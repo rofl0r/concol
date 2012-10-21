@@ -196,14 +196,13 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 			}
 		default:
 			switch(key->sym) {
-				case SDLK_RETURN:
-					return CK_RETURN;
 				case SDLK_DELETE:
 					return CK_DEL;
 				case SDLK_BACKSPACE:
 					return CK_BACKSPACE;
-					
-				case SDLK_a: 
+				case SDLK_RETURN:
+					return CK_RETURN;
+				case SDLK_a:
 					return 'a';
 				case SDLK_b: 
 					return 'b';
@@ -293,6 +292,7 @@ static int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 			if(event.key.keysym.mod & KMOD_LCTRL  || event.key.keysym.mod & KMOD_RCTRL ) keymods |= CK_MOD_CTRL;
 			if(event.key.keysym.mod & KMOD_LMETA  || event.key.keysym.mod & KMOD_RMETA ) keymods |= CK_MOD_FLAG;
 			if(event.key.keysym.mod & KMOD_MODE) keymods |= CK_MOD_ALTGR;
+			if(event.key.keysym.mod & KMOD_NUM) keymods |= CK_MOD_NUMERICPAD;
 			switch (event.key.keysym.sym) {
 				case SDLK_PAGEUP:
 					return keymods | CK_PAGE_UP;
@@ -306,34 +306,17 @@ static int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 					return keymods | CK_CURSOR_LEFT;
 				case SDLK_RIGHT:
 					return keymods | CK_CURSOR_RIGHT;
-				case SDLK_F1:
-					return keymods | CK_F1;
-				case SDLK_F2:
-					return keymods | CK_F2;
-				case SDLK_F3:
-					return keymods | CK_F3;
-				case SDLK_F4:
-					return keymods | CK_F4;
-				case SDLK_F5:
-					return keymods | CK_F5;
-				case SDLK_F6:
-					return keymods | CK_F6;
-				case SDLK_F7:
-					return keymods | CK_F7;
-				case SDLK_F8:
-					return keymods | CK_F8;
-				case SDLK_F9:
-					return keymods | CK_F9;
-				case SDLK_F10:
-					return keymods | CK_F10;
-				case SDLK_F11:
-					return keymods | CK_F11;
-				case SDLK_F12:
-					if(keymods & CK_MOD_ALT) {
-						print_all_fonts(self);
-						return CK_UNDEF;
+				case SDLK_F1: case SDLK_F2: case SDLK_F3:
+				case SDLK_F4: case SDLK_F5: case SDLK_F6:
+				case SDLK_F7: case SDLK_F8: case SDLK_F9:
+				case SDLK_F10: case SDLK_F11: case SDLK_F12:
+					if(event.key.keysym.sym == SDLK_F12) {
+						if(keymods & CK_MOD_ALT) {
+							print_all_fonts(self);
+							return CK_UNDEF;
+						}
 					}
-					return keymods | CK_F12;
+					return keymods | (CK_F1 + (event.key.keysym.sym - SDLK_F1));
 				case SDLK_RSHIFT:
 					return keymods | CK_RSHIFT;
 				case SDLK_LSHIFT:
@@ -358,8 +341,20 @@ static int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 					return keymods | CK_HOME;
 				case SDLK_END:
 					return keymods | CK_END;
-					
-					
+				case SDLK_KP_PLUS:
+					return keymods | CK_PLUS;
+				case SDLK_KP_MINUS:
+					return keymods | CK_MINUS;
+				case SDLK_KP_DIVIDE:
+					return keymods | '%';
+				case SDLK_KP_MULTIPLY:
+					return keymods | '*';
+				case SDLK_KP_ENTER:
+					return keymods | CK_RETURN;
+				case SDLK_KP0: case SDLK_KP1: case SDLK_KP2: case SDLK_KP3:
+				case SDLK_KP4: case SDLK_KP5: case SDLK_KP6: case SDLK_KP7:
+				case SDLK_KP8: case SDLK_KP9:
+					return keymods | ('0' + (event.key.keysym.sym - SDLK_KP0));
 				default:
 					return keymods | sdlkey_to_ascii(self, &event.key.keysym);
 			}

@@ -13,6 +13,7 @@
 #define CK_ERR CK_UNDEF
 #define CK_QUIT 1
 #define CK_TAB 9
+#define CK_RETURN '\r'
 #define CK_ESCAPE 27
 // +/- on numeric pad
 #define CK_PLUS 43
@@ -48,7 +49,8 @@
 #define CK_F12 0x11B
 #define CK_DEL 0x11C
 #define CK_BACKSPACE 0x11D
-#define CK_RETURN 0x11E
+//#define CK_RETURN 0x11E
+// 0x11E is free for usage
 #define CK_HOME 0x11F
 #define CK_END 0x120
 #define CK_INS 0x121
@@ -69,5 +71,6 @@
 #define CK_MOD_CTRL (1 << 13)
 #define CK_MOD_FLAG (1 << 14)
 #define CK_MOD_CONTEXT (1 << 15)
+#define CK_MOD_NUMERICPAD (1 << 16)
 
 #endif
