@@ -62,8 +62,8 @@ clean-symlink:
 	rm -f $(MAINLIB)
 
 clean-all:
-	rm -f *.a
-	rm -f *.so
+	rm -f $(LIBNAME)*.a
+	rm -f $(LIBNAME)*.so
 	rm -f *.o
 	rm -f examples/*.o
 	rm -f fonts/*.o
