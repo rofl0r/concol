@@ -21,7 +21,7 @@ typedef enum {
 } mouse_button;
 
 typedef enum {
-	ME_BUTTON_DOWN,
+	ME_BUTTON_DOWN = 0,
 	ME_BUTTON_UP,
 	ME_WHEEL_DOWN,
 	ME_WHEEL_UP,
