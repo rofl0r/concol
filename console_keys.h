@@ -59,6 +59,7 @@
 // use bit 9-10 for other events.
 #define CK_RESIZE_EVENT 0x200
 #define CK_MOUSE_EVENT 0x201
+#define CK_EVENT_MASK (1 << 9)
 
 #define CK_AND_EVENT_MASK ((1 << 10) - 1)
 
