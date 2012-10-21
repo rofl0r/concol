@@ -58,19 +58,22 @@
 
 #define CK_MASK ((1 << 9) - 1)
 
-// use bit 9-10 for other events.
-#define CK_RESIZE_EVENT 0x200
-#define CK_MOUSE_EVENT 0x201
-#define CK_EVENT_MASK (1 << 9)
+// use higher bits for events and modifiers.
+#define CK_EVENT_BIT_FIRST 9
+#define CK_RESIZE_EVENT (1 << CK_EVENT_BIT_FIRST)
+#define CK_EVENT_BIT_LAST (CK_EVENT_BIT_FIRST + 1)
+#define CK_MOUSE_EVENT (1 << (CK_EVENT_BIT_LAST))
+#define CK_EVENT_MASK (1 << CK_EVENT_BIT_FIRST) || (1 << (CK_EVENT_BIT_LAST))
 
-#define CK_AND_EVENT_MASK ((1 << 10) - 1)
+#define CK_MOD_BIT_FIRST (CK_EVENT_BIT_LAST + 1)
+#define CK_AND_EVENT_MASK ((1 << CK_MOD_BIT_FIRST) - 1)
 
-#define CK_MOD_ALT (1 << 10)
-#define CK_MOD_ALTGR (1 << 11)
-#define CK_MOD_SHIFT (1 << 12)
-#define CK_MOD_CTRL (1 << 13)
-#define CK_MOD_FLAG (1 << 14)
-#define CK_MOD_CONTEXT (1 << 15)
-#define CK_MOD_NUMERICPAD (1 << 16)
+#define CK_MOD_ALT (1 << (CK_MOD_BIT_FIRST))
+#define CK_MOD_ALTGR (1 << (CK_MOD_BIT_FIRST + 1))
+#define CK_MOD_SHIFT (1 << (CK_MOD_BIT_FIRST + 2))
+#define CK_MOD_CTRL (1 << (CK_MOD_BIT_FIRST + 3))
+#define CK_MOD_FLAG (1 << (CK_MOD_BIT_FIRST + 4))
+#define CK_MOD_CONTEXT (1 << (CK_MOD_BIT_FIRST + 5))
+#define CK_MOD_NUMERICPAD (1 << (CK_MOD_BIT_FIRST + 6))
 
 #endif
