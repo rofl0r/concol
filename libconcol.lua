@@ -31,7 +31,7 @@ typedef enum {
 } mouse_button;
 
 typedef enum {
-	ME_BUTTON_DOWN,
+	ME_BUTTON_DOWN = 0,
 	ME_BUTTON_UP,
 	ME_WHEEL_DOWN,
 	ME_WHEEL_UP,
@@ -110,7 +110,8 @@ typedef struct {
 
 typedef struct {
 	point dim;
-	char* characters[256];
+	unsigned long bytesperchar;
+	char* characters;
 } font;
 
 typedef struct SDLConsole {
