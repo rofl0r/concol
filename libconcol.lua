@@ -110,7 +110,7 @@ typedef struct {
 
 typedef struct {
 	point dim;
-	unsigned long bytesperchar;
+	unsigned long pointsperchar;
 	char* characters;
 } font;
 

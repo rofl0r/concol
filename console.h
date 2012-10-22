@@ -12,7 +12,7 @@
 #include "tbconsole.h"
 #include "ncconsole.h"
 
-#include "fonts/bitfont.h"
+#include "fonts/font.h"
 
 extern unsigned int console_chartab[CC_MAX];
 #define CCT(charname) (console_chartab[charname])
@@ -98,7 +98,7 @@ enum ConsoleBackend console_getbackendtype(Console *c);
 /* sdl-specific, only implemented in SDL backend. */
 void console_toggle_fullscreen(Console *c);
 /* must be called after console_init() */
-void console_init_graphics(Console* self, point resolution, bitfont* fnt);
+void console_init_graphics(Console* self, point resolution, font* fnt);
 
 /*
 TODO :

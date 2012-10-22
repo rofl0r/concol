@@ -1,10 +1,10 @@
 #ifndef TESTFONT_H
 #define TESTFONT_H
 
-#include "bitfont.h"
+#include "font.h"
 
-extern bitfont testfont;
+extern font testfont;
 
-//RcB: DEP "testfont2.c"
+//RcB: DEP "testfont.c"
 
 #endif

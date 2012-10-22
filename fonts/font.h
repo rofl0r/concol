@@ -5,12 +5,8 @@
 
 typedef struct {
 	point dim;
-	unsigned long bytesperchar;
+	unsigned long pointsperchar;
 	char *characters;
 } font;
-
-static inline char* font_get_char(font* f, unsigned long index) {
-	return f->characters + (f->bytesperchar * (index & 0xff)); 
-}
 
 #endif

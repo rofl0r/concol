@@ -33,7 +33,7 @@ void console_init(struct Console *self) {
 	c->surface = NULL;
 }
 
-void console_init_graphics(Console* self, point resolution, bitfont* fnt) {
+void console_init_graphics(Console* self, point resolution, font* fnt) {
 	struct SDLConsole *c = &self->backend.sdl;
 #ifndef CONSOLE_FONT
 	if(!fnt) fnt = &testfont;
@@ -87,7 +87,6 @@ void console_sleep(struct Console* self, int ms) {
 
 #define INCLUDED_FROM_SDLCONSOLE
 #include "sdlconsole_keyboard.c"
-#include "fonts/bitfont.h"
 int console_getkey_nb(Console* c) {
 	SDL_Event event;
 	/* Loop through waiting messages and process them */
@@ -232,6 +231,22 @@ void console_blink_cursor(Console* self) {
 		self->isblinking = ~self->isblinking;
 	}
 	console_unlock();
+}
+
+#include <assert.h>
+#include "../lib/include/bitarray.h"
+static char* bitfont_get_char(font* f, unsigned int ch) {
+	static unsigned int lastchr = (unsigned) -1;
+	static unsigned char char_data[16*16];
+	if(ch != lastchr) {
+		unsigned char* p = char_data;
+		size_t i, start = f->pointsperchar * ch;
+		assert(f->pointsperchar <= sizeof(char_data));
+		for(i = 0; i < f->pointsperchar; i++)
+			*(p++) = BA_GET(f->characters, start + i);
+		lastchr = ch;
+	}
+	return (char*) char_data;
 }
 
 void console_putchar(Console* self, int ch, int doupdate) {

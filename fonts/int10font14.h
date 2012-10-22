@@ -1,9 +1,9 @@
 #ifndef INT10FONT14_H
 #define INT10FONT14_H
 
-#include "bitfont.h"
+#include "font.h"
 
-extern bitfont int10font14;
+extern font int10font14;
 
 //RcB: DEP "int10font14.c"
 

@@ -6,7 +6,7 @@ CFLAGS="-DCONSOLE_FONT=$fontname -g -O0" rcb --new --force font2bitfont.c > /dev
 ../../bin2h/bin2h.pl font.data | perl -pe 's/^#.*$//;'
 fontname=$(echo $fontname | perl -pe '$_ = lc($_);')
 cat << EOF
-const bitfont $fontname = {
+const font $fontname = {
 	{FONTWIDTH, FONTHEIGHT},
 	FONTWIDTH * FONTHEIGHT,
 	(char*) font_data

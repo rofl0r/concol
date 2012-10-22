@@ -1,4 +1,4 @@
-#include "bitfont.h"
+#include "font.h"
 #define FONTWIDTH 6
 #define FONTHEIGHT 13
 
@@ -69,7 +69,7 @@ static const unsigned char font_data[] =
 ;
 
 
-const bitfont testfont = {
+const font testfont = {
 	{FONTWIDTH, FONTHEIGHT},
 	FONTWIDTH * FONTHEIGHT,
 	(char*) font_data
