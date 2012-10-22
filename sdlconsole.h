@@ -6,7 +6,7 @@
 
 #include "point.h"
 #include "rect.h"
-#include "fonts/font.h"
+#include "fonts/bitfont.h"
 #include "console.h"
 #include "console_events.h"
 
@@ -64,7 +64,7 @@ typedef struct SDLConsole {
 	void *surface;
 	sdl_rgb_tuple color;
 	point res;
-	font* fnt;
+	bitfont* fnt;
 	int paintmode:1;
 	int cursorblink:1;
 	int fullscreen:1;

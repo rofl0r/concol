@@ -3,8 +3,8 @@
 
 #include "bitfont.h"
 
-extern bitfont testfont;
+extern font testfont;
 
-//RcB: DEP "testfont2.c"
+//RcB: DEP "testfont.c"
 
 #endif

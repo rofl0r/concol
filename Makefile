@@ -52,7 +52,7 @@ endif
 #endif
 
 
-SRCS=console.c fonts/testfont.c fonts/dosfonts.c fonts/bitfont.c $(BACKEND_SRCS)
+SRCS=console.c fonts/testfont2.c fonts/int10font08.c fonts/int10font14.c fonts/int10font16.c $(BACKEND_SRCS)
 OBJS=$(SRCS:.c=.o)
 
 

@@ -242,4 +242,4 @@ void console_blink_cursor(struct Console* self) { (void) self; }
 void console_lock(void) {}
 void console_unlock(void) {}
 void console_toggle_fullscreen(struct Console* self) { (void) self; }
-void console_init_graphics(Console* self, point resolution, font* fnt) {(void) self; (void) resolution; (void) fnt;}
+void console_init_graphics(Console* self, point resolution, bitfont* fnt) {(void) self; (void) resolution; (void) fnt;}

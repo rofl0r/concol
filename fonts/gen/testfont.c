@@ -1,4 +1,4 @@
-#include "font.h"
+#include "../font.h"
 
 #define FONTWIDTH 6
 #define FONTHEIGHT 13

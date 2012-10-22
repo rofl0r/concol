@@ -1,6 +1,6 @@
-#include "bitfont.h"
-#include "font.h"
-#include "../../lib/include/bitarray.h"
+#include "../bitfont.h"
+#include "../font.h"
+#include "../../../lib/include/bitarray.h"
 #include <stdlib.h>
 #include <limits.h>
 
@@ -33,12 +33,10 @@ bitfont* font_to_bitfont(font *f) {
 	res->dim.x = f->dim.x;
 	res->dim.y = f->dim.y;
 	res->characters = ((char*) res) + sizeof(bitfont);
-	size_t i, c;
+	size_t c;
 	char* src = f->characters;
-	for(i = 0; i < 256; i++) {
-		for(c = 0; c < f->bytesperchar; c++) {
-			BA_SET(res->characters, i * 256 + c, *(src++));
-		}
+	for(c = 0; c < 256 * f->bytesperchar; c++) {
+		BA_SET(res->characters, c, *(src++));
 	}
 	return res;
 }

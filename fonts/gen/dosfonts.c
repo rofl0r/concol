@@ -1,4 +1,4 @@
-#include "bitfont.h"
+#include "../bitfont.h"
 
 //[256 * 8]
 bitfont int10_font_08 = {

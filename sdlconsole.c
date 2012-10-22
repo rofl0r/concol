@@ -33,7 +33,7 @@ void console_init(struct Console *self) {
 	c->surface = NULL;
 }
 
-void console_init_graphics(Console* self, point resolution, font* fnt) {
+void console_init_graphics(Console* self, point resolution, bitfont* fnt) {
 	struct SDLConsole *c = &self->backend.sdl;
 #ifndef CONSOLE_FONT
 	if(!fnt) fnt = &testfont;
@@ -87,6 +87,7 @@ void console_sleep(struct Console* self, int ms) {
 
 #define INCLUDED_FROM_SDLCONSOLE
 #include "sdlconsole_keyboard.c"
+#include "fonts/bitfont.h"
 int console_getkey_nb(Console* c) {
 	SDL_Event event;
 	/* Loop through waiting messages and process them */
@@ -237,7 +238,7 @@ void console_putchar(Console* self, int ch, int doupdate) {
 	struct SDLConsole *c = &self->backend.sdl;
 	console_unblink(self);
 	console_lock();
-	char* char_data = font_get_char(c->fnt, ch & 0xff);
+	char* char_data = bitfont_get_char(c->fnt, ch & 0xff);
 	sdl_rgb_t *ptr = (sdl_rgb_t *) ((SDL_Surface*) c->surface)->pixels;
 	sdl_rgb_t *color;
 	int lineoffset;

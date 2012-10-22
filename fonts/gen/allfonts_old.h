@@ -15,33 +15,20 @@
 
 #if (CONSOLE_FONT==TESTFONT)
 //RcB: SKIPON "CONSOLE_FONT=INT10FONT"
-#  include "testfont.h"
+#  include "testfont_old.h"
 //RcB: SKIPOFF "CONSOLE_FONT=INT10FONT"
 #  define FONT (&testfont)
 #elif (CONSOLE_FONT >= BITFONT_START)
 //RcB: SKIPON "CONSOLE_FONT=TESTFONT"
-#  if (CONSOLE_FONT==INT10FONT08)
-//RcB: SKIPON "CONSOLE_FONT=INT10FONT14"
-//RcB: SKIPON "CONSOLE_FONT=INT10FONT16"
-#    include "int10font08.h"
-//RcB: SKIPOFF "CONSOLE_FONT=INT10FONT14"
-//RcB: SKIPOFF "CONSOLE_FONT=INT10FONT16"
-#    define FONT (&int10font08)
-#  elif (CONSOLE_FONT==INT10FONT14)
-//RcB: SKIPON "CONSOLE_FONT=INT10FONT08"
-//RcB: SKIPON "CONSOLE_FONT=INT10FONT16"
-#    include "int10font14.h"
-//RcB: SKIPOFF "CONSOLE_FONT=INT10FONT08"
-//RcB: SKIPOFF "CONSOLE_FONT=INT10FONT16"
-#    define FONT (&int10font14)
-#  elif (CONSOLE_FONT==INT10FONT16)
-//RcB: SKIPON "CONSOLE_FONT=INT10FONT08"
-//RcB: SKIPON "CONSOLE_FONT=INT10FONT14"
-#    include "int10font16.h"
-//RcB: SKIPOFF "CONSOLE_FONT=INT10FONT08"
-//RcB: SKIPOFF "CONSOLE_FONT=INT10FONT14"
-#    define FONT (&int10font16)
+#  include "bitfont.h"
+#  include "dosfonts.h"
 //RcB: SKIPOFF "CONSOLE_FONT=TESTFONT"
+#  if (CONSOLE_FONT==INT10FONT08)
+#    define FONT (bitfont_to_font(&int10_font_08))
+#  elif (CONSOLE_FONT==INT10FONT14)
+#    define FONT (bitfont_to_font(&int10_font_14))
+#  elif (CONSOLE_FONT==INT10FONT16)
+#    define FONT (bitfont_to_font(&int10_font_16))
 #  else
 #    error "unknown font"
 #  endif
