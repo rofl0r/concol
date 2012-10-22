@@ -234,7 +234,10 @@ void console_blink_cursor(Console* self) {
 }
 
 #include <assert.h>
-#include "../lib/include/bitarray.h"
+#include <limits.h>
+#define BA_TARGET_BYTE(X, Y) ((X) + ((Y) / CHAR_BIT))
+#define BA_BIT_DISTANCE(X, Y) ((Y) % CHAR_BIT)
+#define BA_GET(X, Y) (!!( *BA_TARGET_BYTE(X, Y) & (1 << BA_BIT_DISTANCE(X, Y)) ))
 static char* bitfont_get_char(font* f, unsigned int ch) {
 	static unsigned int lastchr = (unsigned) -1;
 	static unsigned char char_data[16*16];
