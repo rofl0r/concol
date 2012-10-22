@@ -26,3 +26,19 @@ font* bitfont_to_font(bitfont* f) {
 	}
 	return res;
 }
+
+bitfont* font_to_bitfont(font *f) {
+	bitfont *res = malloc(sizeof(bitfont) + BA_SIZE_REQUIRED(f->bytesperchar * 256));
+	res->bitperchar=f->bytesperchar;
+	res->dim.x = f->dim.x;
+	res->dim.y = f->dim.y;
+	res->characters = ((char*) res) + sizeof(bitfont);
+	size_t i, c;
+	char* src = f->characters;
+	for(i = 0; i < 256; i++) {
+		for(c = 0; c < f->bytesperchar; c++) {
+			BA_SET(res->characters, i * 256 + c, *(src++));
+		}
+	}
+	return res;
+}
