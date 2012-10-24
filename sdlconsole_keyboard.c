@@ -292,7 +292,8 @@ static int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 			if(event.key.keysym.mod & KMOD_LCTRL  || event.key.keysym.mod & KMOD_RCTRL ) keymods |= CK_MOD_CTRL;
 			if(event.key.keysym.mod & KMOD_LMETA  || event.key.keysym.mod & KMOD_RMETA ) keymods |= CK_MOD_FLAG;
 			if(event.key.keysym.mod & KMOD_MODE) keymods |= CK_MOD_ALTGR;
-			if(event.key.keysym.mod & KMOD_NUM) keymods |= CK_MOD_NUMERICPAD;
+			/* there's apparently a bug in SDL 1.2.0: when i press 'c', KMOD_NUM is set
+			 if(event.key.keysym.mod & KMOD_NUM) keymods |= CK_MOD_NUMERICPAD; */
 			switch (event.key.keysym.sym) {
 				case SDLK_PAGEUP:
 					return keymods | CK_PAGE_UP;
