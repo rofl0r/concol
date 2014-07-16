@@ -361,6 +361,7 @@ static int check_modifier_state(mmask_t state) {
 
 static int translate_event(struct Console *self, int key) {
 	int ret = CK_UNDEF;
+	if(key == -1) return ret;
 	MEVENT mouse_ev;
 	
 	switch(key) {
