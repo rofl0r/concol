@@ -16,7 +16,7 @@ void console_setautomove(Console* c, int automove) {
 }
 
 void console_unblink(Console* c) {
-	if(c->isblinking) 
+	if(c->isblinking)
 		console_blink_cursor(c);
 }
 
@@ -46,7 +46,7 @@ void console_linebreak(Console* c) {
 void console_advance_cursor(Console* c, int steps) {
 	// unblink former position
 	console_unblink(c);
-	
+
 	if(c->cursor.x + steps >= c->dim.x)
 		console_linebreak(c);
 	else if(c->cursor.x + steps < 0) {
@@ -54,7 +54,7 @@ void console_advance_cursor(Console* c, int steps) {
 			c->cursor.x = c->dim.x - 1;
 			c->cursor.y--;
 		}
-	} else 
+	} else
 		c->cursor.x += steps;
 }
 

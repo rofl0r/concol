@@ -43,7 +43,7 @@ void console_init_graphics(Console* self, point resolution, font* fnt) {
 		exit(1);
 	}
 	screens_lock = SDL_CreateMutex();
-	
+
 	c->fnt = fnt;
 	console_resize(self, resolution.x, resolution.y);
 	//c->fnt = bitfont_to_font(&int10_font_16);
@@ -151,9 +151,9 @@ void console_resize(Console *self, int w, int h) {
 	c->res.y = h;
 	self->dim.x = w / c->fnt->dim.x;
 	self->dim.y = h / c->fnt->dim.y;
-	if(c->surface) 
+	if(c->surface)
 		SDL_FreeSurface(c->surface);
-	
+
 	c->surface = SDL_SetVideoMode(w, h, 32, SDL_RESIZABLE | SDL_HWPALETTE);
 	if(!c->surface) {
 		printf("Couldn't set screen mode to %d x %d : %s\n", w, h, SDL_GetError());

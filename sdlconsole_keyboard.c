@@ -11,18 +11,18 @@
 static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 	SDLConsole *c = &self->backend.sdl;
 	int shift;
-	
+
 	if(     (key->mod & KMOD_LSHIFT) || (key->mod & KMOD_RSHIFT))
 		shift = 1;
-	else if((key->mod & KMOD_LALT)   || (key->mod & KMOD_RALT)) 
+	else if((key->mod & KMOD_LALT)   || (key->mod & KMOD_RALT))
 		shift = -1; // ALT
-	else if((key->mod & KMOD_LCTRL)  || (key->mod & KMOD_RCTRL)) 
+	else if((key->mod & KMOD_LCTRL)  || (key->mod & KMOD_RCTRL))
 		shift = -2; // CTRL
-	else if(key->mod & KMOD_MODE) 
+	else if(key->mod & KMOD_MODE)
 		shift = -3; // ALT GR
-	else 
+	else
 		shift = 0;
-	
+
 	printf("shift: %d, mod %d, sym %d, name %s\n", shift, key->mod, key->sym, SDL_GetKeyName(key->sym));
 	switch(shift) {
 		// alt
@@ -52,22 +52,22 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 					return 185;
 				case SDLK_e:
 					return 187;
-					
+
 				case SDLK_b:
 					return 176;
 				case SDLK_n:
 					return 177;
 				case SDLK_m:
 					return 178;
-					
+
 				case SDLK_SPACE:
 					return 219;
-					
+
 				default:
 					return key->sym;
-			} else 
+			} else
 				return key->sym;
-			
+
 			break;
 		//alt gr
 		case -3:
@@ -83,53 +83,51 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 					return ']';
 				case SDLK_0:
 					return '}';
-					
+
 				case SDLK_WORLD_63:
 					return '\\';
 				case SDLK_PLUS:
 					return '~';
 				case SDLK_LESS:
 					return '|';
-					
-					
-					
+
 				default:
 					return key->sym;
 			}
-			
-		case 1: 
+
+		case 1:
 			switch(key->sym) {
-				case SDLK_a: 
+				case SDLK_a:
 					return 'A';
-				case SDLK_b: 
+				case SDLK_b:
 					return 'B';
-				case SDLK_c: 
+				case SDLK_c:
 					return 'C';
-				case SDLK_d: 
+				case SDLK_d:
 					return 'D';
-				case SDLK_e: 
+				case SDLK_e:
 					return 'E';
 				case SDLK_f:
 					return 'F';
 				case SDLK_g:
 					return 'G';
-				case SDLK_h: 
+				case SDLK_h:
 					return 'H';
-				case SDLK_i: 
+				case SDLK_i:
 					return 'I';
 				case SDLK_j:
 					return 'J';
-				case SDLK_k: 
+				case SDLK_k:
 					return 'K';
-				case SDLK_l: 
+				case SDLK_l:
 					return 'L';
-				case SDLK_m: 
+				case SDLK_m:
 					return 'M';
-				case SDLK_n: 
+				case SDLK_n:
 					return 'N';
-				case SDLK_o: 
+				case SDLK_o:
 					return 'O';
-				case SDLK_p: 
+				case SDLK_p:
 					return 'P';
 				case SDLK_q:
 					return 'Q';
@@ -147,7 +145,7 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 					return 'W';
 				case SDLK_x:
 					return 'X';
-				case SDLK_y: 
+				case SDLK_y:
 					return 'Y';
 				case SDLK_z:
 					return 'Z';
@@ -172,16 +170,16 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 					return ')';
 				case SDLK_0:
 					return '=';
-				
+
 				case SDLK_HASH:
 					return '\'';
-					
+
 				case SDLK_PLUS:
 					return '*';
-					
+
 				case SDLK_LESS:
 					return '>';
-					
+
 				case SDLK_WORLD_63:
 					return '?';
 				case SDLK_PERIOD:
@@ -204,35 +202,35 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 					return CK_RETURN;
 				case SDLK_a:
 					return 'a';
-				case SDLK_b: 
+				case SDLK_b:
 					return 'b';
-				case SDLK_c: 
+				case SDLK_c:
 					return 'c';
-				case SDLK_d: 
+				case SDLK_d:
 					return 'd';
-				case SDLK_e: 
+				case SDLK_e:
 					return 'e';
 				case SDLK_f:
 					return 'f';
 				case SDLK_g:
 					return 'g';
-				case SDLK_h: 
+				case SDLK_h:
 					return 'h';
-				case SDLK_i: 
+				case SDLK_i:
 					return 'i';
 				case SDLK_j:
 					return 'j';
-				case SDLK_k: 
+				case SDLK_k:
 					return 'k';
-				case SDLK_l: 
+				case SDLK_l:
 					return 'l';
-				case SDLK_m: 
+				case SDLK_m:
 					return 'm';
-				case SDLK_n: 
+				case SDLK_n:
 					return 'n';
-				case SDLK_o: 
+				case SDLK_o:
 					return 'o';
-				case SDLK_p: 
+				case SDLK_p:
 					return 'p';
 				case SDLK_q:
 					return 'q';
@@ -250,7 +248,7 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 					return 'w';
 				case SDLK_x:
 					return 'x';
-				case SDLK_y: 
+				case SDLK_y:
 					return 'y';
 				case SDLK_z:
 					return 'z';
@@ -363,7 +361,7 @@ static int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 		case SDL_MOUSEBUTTONUP:
 		case SDL_MOUSEBUTTONDOWN:
 			self->mouse.mouse_ev = (event.type == SDL_MOUSEBUTTONDOWN) ? ME_BUTTON_DOWN : ME_BUTTON_UP;
-			
+
 			switch(event.button.button) {
 				case SDL_BUTTON_MIDDLE:
 					self->mouse.button = MB_LEFT;
@@ -384,7 +382,7 @@ static int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 			}
 			self->mouse.coords.x = event.button.x / c->fnt->dim.x;
 			self->mouse.coords.y = event.button.y / c->fnt->dim.y;
-			
+
 			return CK_MOUSE_EVENT;
 		case SDL_MOUSEMOTION:
 			if(event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT)) self->mouse.button = MB_LEFT;
