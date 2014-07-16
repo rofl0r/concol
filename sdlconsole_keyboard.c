@@ -276,7 +276,10 @@ static void print_all_fonts(Console* c) {
 	console_draw(c);
 }
 
-static int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
+#if 0
+static
+#endif
+int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 	SDLConsole* c = &self->backend.sdl;
 	int keymods;
 	SDL_Event event = *ev;
