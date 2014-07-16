@@ -44,4 +44,6 @@ typedef struct {
 #define RGB(x,y,z) ((rgb_t) {{x, y, z, 0}})
 #endif
 
+#define RGB_INIT(R,G,B) {.r = R, .g = G, .b = B, .a = 0}
+
 #endif /* RGB_H_ */
