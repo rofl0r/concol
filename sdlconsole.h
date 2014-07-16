@@ -39,6 +39,8 @@ typedef union {
 #define SRGB_INIT(x,y,z) ({.colors.r = R, .colors.g = G, .colors.b = B, .colors.a = 0})
 #define SRGB3(X) SRGB(X)
 
+#include "colors.h"
+
 #define SRGB_BLACK SRGB3(BLACK)
 #define SRGB_WHITE SRGB3(WHITE)
 #define SRGB_RED SRGB3(RED)
