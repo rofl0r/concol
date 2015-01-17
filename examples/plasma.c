@@ -3,6 +3,8 @@ CFLAGS="-Wall -DCONSOLE_BACKEND=SDL_CONSOLE" rcb --new --force --debug plasma.c
 CFLAGS="-Wall -DCONSOLE_BACKEND=NCURSES_CONSOLE" rcb --new --force --debug plasma.c
 CFLAGS="-Wall -DCONSOLE_BACKEND=TERMBOX_CONSOLE -L ../../termbox" rcb --new --force --debug plasma.c
 */
+
+//RcB: LINK "-lm"
 #include "../console.h"
 #include "../console_keys.h"
 #define CONSOLE_FONT TESTFONT
