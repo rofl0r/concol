@@ -417,7 +417,9 @@ static int translate_event(struct Console *self, int key) {
 		case KEY_RIGHT:
 			ret = CK_CURSOR_RIGHT;
 			break;
-
+		case KEY_BACKSPACE: case 127:
+			ret = CK_BACKSPACE;
+			break;
 		default:
 			ret = key;
 	}
