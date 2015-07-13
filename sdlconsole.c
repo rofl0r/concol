@@ -100,12 +100,13 @@ int console_getkey(Console* c) {
 	SDL_Event event;
 	/* Loop through waiting messages and process them */
 	int ret;
-	while(1)
+	while(1) {
 		while (SDL_PollEvent(&event)) {
 			ret = sdlconsole_translate_event(c, &event);
 			if(ret != CK_UNDEF) return ret;
-			console_sleep(c, 1);
 		}
+		console_sleep(c, 1);
+	}
 	return CK_UNDEF;
 }
 
