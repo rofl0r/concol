@@ -133,8 +133,9 @@ void console_init(struct Console* con) {
 	self->lastused.fgcol = -1;
 	self->lastused.bgcol = -1;
 
-	con->dim.x = stdscr->_maxx + 1;
-	con->dim.y = stdscr->_maxy + 1;
+	getmaxyx(stdscr, con->dim.y, con->dim.x);
+	con->dim.x++;
+	con->dim.y++;
 
 	signal(SIGWINCH, resized);
 }
@@ -294,8 +295,9 @@ static int console_usecolorpair(struct NcConsole* self, int pair) {
 
 void console_getbounds(struct Console* self, int* x, int* y) {
 	if(stdscr) {
-		self->dim.x = *x = stdscr->_maxx + 1;
-		self->dim.y = *y = stdscr->_maxy + 1;
+		getmaxyx(stdscr, self->dim.y, self->dim.x);
+		*x = ++self->dim.x;
+		*y = ++self->dim.y;
 	} else {
 		*y = -1;
 		*x = -1;
@@ -318,8 +320,11 @@ void console_addchar(struct Console* self, int c, unsigned int attributes) {
 
 // prints a char and advances cursor
 void console_printchar(struct Console* self, int c, unsigned int attributes) {
-	int newx = self->cursor.x == stdscr->_maxx ? 1 : self->cursor.x + 1;
-	int newy = self->cursor.x == stdscr->_maxx ? self->cursor.y + 1 : self->cursor.y;
+	int maxy, maxx;
+	getmaxyx(stdscr, maxy, maxx);
+	(void) maxy;
+	int newx = self->cursor.x == maxx ? 1 : self->cursor.x + 1;
+	int newy = self->cursor.x == maxx ? self->cursor.y + 1 : self->cursor.y;
 	console_addchar(self, c, attributes);
 	console_goto(self, newx, newy);
 }
