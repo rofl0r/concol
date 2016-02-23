@@ -174,7 +174,7 @@ static void console_restorecolors(struct NcConsole *self) {
 		);
 	}
 	for (i = MIN_COLORPAIR_NUMBER; i < self->maxcolor + MIN_COLORPAIR_NUMBER; i++) {
-		init_pair(i, self->org_fgcolors[i], self->org_fgcolors[i]);
+		init_pair(i, self->org_fgcolors[i], self->org_bgcolors[i]);
 	}
 }
 
