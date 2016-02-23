@@ -81,8 +81,11 @@ void console_init(struct Console* con) {
 
 	struct NcConsole *self = &con->backend.nc;
 
-	strncpy(self->org_term, getenv("TERM"), sizeof(self->org_term));
-	if(memcmp(self->org_term, "xterm", 5) == 0) setenv("TERM", "xterm-256color", 1);
+	snprintf(self->org_term, sizeof(self->org_term), "%s", getenv("TERM"));
+	if(!strcmp(self->org_term, "xterm"))
+		setenv("TERM", "xterm-256color", 1);
+	else if(!strcmp(self->org_term, "rxvt-unicode"))
+		setenv("TERM", "rxvt-unicode-256color", 1);
 	invalid_color.a = 255;
 	self->active.fgcol = -1;
 	self->active.fgcol = -1;
