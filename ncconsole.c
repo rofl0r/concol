@@ -47,15 +47,6 @@ static int console_usecolorpair(struct NcConsole* self, int pair);
 //RcB: LINK "-lpthread"
 
 static pthread_mutex_t resize_mutex;
-static int got_resize_signal = 0;
-
-/* sigwinch signal handler */
-static void resized(int dummy) {
-	(void) dummy;
-	pthread_mutex_lock(&resize_mutex);
-	got_resize_signal = 1;
-	pthread_mutex_unlock(&resize_mutex);
-}
 
 static inline int console_fromthousand(int in) {
 	return in == 0 ? 0 : in == 1000 ? 255 : (in * 1000 * 1000) / 3921568;
@@ -137,8 +128,6 @@ void console_init(struct Console* con) {
 	getmaxyx(stdscr, con->dim.y, con->dim.x);
 	con->dim.x++;
 	con->dim.y++;
-
-	signal(SIGWINCH, resized);
 }
 
 void console_cleanup(struct Console* con) {
@@ -450,25 +439,20 @@ static int translate_event(struct Console *self, int key) {
 
 #include <stropts.h>
 #include <sys/ioctl.h>
-static int deal_with_resize_signal(void) {
+static void deal_with_resize_signal(void) {
 	struct winsize termSize;
-	int ret = 0;
 	pthread_mutex_lock(&resize_mutex);
-	if(got_resize_signal) {
-		if(ioctl(STDIN_FILENO, TIOCGWINSZ, (char *) &termSize) >= 0)
-			resize_term((int)termSize.ws_row, (int)termSize.ws_col);
-		ret = 1;
-		got_resize_signal = 0;
-	}
+	if(ioctl(STDIN_FILENO, TIOCGWINSZ, (char *) &termSize) >= 0)
+		resizeterm((int)termSize.ws_row, (int)termSize.ws_col);
+	refresh();
 	pthread_mutex_unlock(&resize_mutex);
-	return ret;
 }
 
 /* if no input is waiting, the value ERR (-1) is returned */
 int console_getkey(struct Console* con) {
-	if(deal_with_resize_signal()) return CK_RESIZE_EVENT;
 	int ret = wgetch(stdscr);
 	int res = translate_event(con, ret);
+	if(res == CK_RESIZE_EVENT) deal_with_resize_signal();
 #ifdef CONSOLE_DEBUG
 	fprintf(dbg, "getkey res: %d\n", res);
 #endif
@@ -476,12 +460,13 @@ int console_getkey(struct Console* con) {
 }
 
 int console_getkey_nb(struct Console* con) {
-	if(deal_with_resize_signal()) return CK_RESIZE_EVENT;
 	int ret;
 	timeout(0); // set NCURSES getch to nonblocking
 	ret = wgetch(stdscr);
 	timeout(-1); // set NCURSES getch to blocking
-	return translate_event(con, ret);
+	int res = translate_event(con, ret);
+	if(res == CK_RESIZE_EVENT) deal_with_resize_signal();
+	return res;
 }
 
 void console_sleep(struct Console* con, int ms) {
