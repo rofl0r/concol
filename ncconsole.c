@@ -31,7 +31,7 @@
 #define MIN_COLOR_NUMBER 0
 
 //#define CONSOLE_DEBUG
-static rgb_t invalid_color = RGB(0,0,0);
+static rgb_t invalid_color = RGB_INIT(0,0,0);
 
 #ifdef CONSOLE_DEBUG
 static FILE* dbg = NULL;
