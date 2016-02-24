@@ -100,7 +100,8 @@ static void console_savecolors(struct NcConsole *self) {
 	struct color_reader cr;
 	int use_cr;
 	use_cr = !color_reader_init(&cr);
-	for (i = MIN_COLOR_NUMBER; i < 16; i++) {
+	int maxc = COLORS > 16 ? 16 : COLORS;
+	for (i = MIN_COLOR_NUMBER; i < maxc; i++) {
 		if(use_cr) color_reader_get_color(&cr, i, &self->org_colors[i]);
 		else {
 			color_content(i, &r, &g, &b);
