@@ -72,62 +72,6 @@ void console_init(struct Console* con) {
 	memset(con, 0, sizeof(struct Console));
 	con->backendtype = cb_ncurses;
 	pthread_mutex_init(&resize_mutex, NULL);
-
-	struct NcConsole *self = &con->backend.nc;
-
-	snprintf(self->org_term, sizeof(self->org_term), "%s", getenv("TERM"));
-	if(!strcmp(self->org_term, "xterm"))
-		setenv("TERM", "xterm-256color", 1);
-	else if(!strcmp(self->org_term, "rxvt-unicode"))
-		setenv("TERM", "rxvt-unicode-256color", 1);
-	invalid_color.a = 255;
-	self->active.fgcol = -1;
-	self->active.fgcol = -1;
-
-	self->lastattr = 0;
-
-	console_inittables(con);
-
-	initscr();
-	noecho();
-	cbreak();
-	keypad(stdscr, TRUE);
-	nonl(); // get return key events
-
-	// the ncurses table is apparently only initialised after initscr() oslt
-	ncurses_chartab_init();
-
-#ifdef CONSOLE_DEBUG
-	dbg = fopen("console.log", "w");
-#endif
-
-	self->hasColors = has_colors();
-	self->canChangeColors = self->hasColors ? can_change_color() : 0;
-
-	if (self->canChangeColors)
-		console_savecolors(self);
-
-	if (self->hasColors) start_color();
-
-	if((self->hasMouse = (mousemask(ALL_MOUSE_EVENTS |
-		BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED |
-		BUTTON1_RELEASED | BUTTON2_RELEASED | BUTTON3_RELEASED |
-		REPORT_MOUSE_POSITION | BUTTON_SHIFT | BUTTON_ALT | BUTTON_CTRL,
-		NULL) != (mmask_t) ERR)))
-		mouseinterval(0) /* prevent ncurses from making click events.
-		this way we always get an event for buttondown and up.
-		we won't get any mouse movement events either way. */;
-	PDEBUG("hasmouse: %d\n", (int) self->hasMouse);
-	self->lastattr = 0;
-
-	self->maxcolor = 0;
-
-	self->lastused.fgcol = -1;
-	self->lastused.bgcol = -1;
-
-	getmaxyx(stdscr, con->dim.y, con->dim.x);
-	con->dim.x++;
-	con->dim.y++;
 }
 
 void console_cleanup(struct Console* con) {
@@ -474,5 +418,64 @@ void console_blink_cursor(struct Console* self) { (void) self; }
 void console_lock(void) {}
 void console_unlock(void) {}
 void console_toggle_fullscreen(struct Console* self) { (void) self; }
-void console_init_graphics(Console* self, point resolution, font* fnt) {(void) self; (void) resolution; (void) fnt;}
+
+void console_init_graphics(Console* con, point resolution, font* fnt) {
+	(void) resolution; (void) fnt;
+
+	struct NcConsole *self = &con->backend.nc;
+
+	snprintf(self->org_term, sizeof(self->org_term), "%s", getenv("TERM"));
+	if(!strcmp(self->org_term, "xterm"))
+		setenv("TERM", "xterm-256color", 1);
+	else if(!strcmp(self->org_term, "rxvt-unicode"))
+		setenv("TERM", "rxvt-unicode-256color", 1);
+	invalid_color.a = 255;
+	self->active.fgcol = -1;
+	self->active.fgcol = -1;
+
+	self->lastattr = 0;
+
+	console_inittables(con);
+
+	initscr();
+	noecho();
+	cbreak();
+	keypad(stdscr, TRUE);
+	nonl(); // get return key events
+
+	// the ncurses table is apparently only initialised after initscr() oslt
+	ncurses_chartab_init();
+
+#ifdef CONSOLE_DEBUG
+	dbg = fopen("console.log", "w");
+#endif
+
+	self->hasColors = has_colors();
+	self->canChangeColors = self->hasColors ? can_change_color() : 0;
+
+	if (self->canChangeColors)
+		console_savecolors(self);
+
+	if (self->hasColors) start_color();
+
+	if((self->hasMouse = (mousemask(ALL_MOUSE_EVENTS |
+		BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED |
+		BUTTON1_RELEASED | BUTTON2_RELEASED | BUTTON3_RELEASED |
+		REPORT_MOUSE_POSITION | BUTTON_SHIFT | BUTTON_ALT | BUTTON_CTRL,
+		NULL) != (mmask_t) ERR)))
+		mouseinterval(0) /* prevent ncurses from making click events.
+		this way we always get an event for buttondown and up.
+		we won't get any mouse movement events either way. */;
+	PDEBUG("hasmouse: %d\n", (int) self->hasMouse);
+	self->lastattr = 0;
+
+	self->maxcolor = 0;
+
+	self->lastused.fgcol = -1;
+	self->lastused.bgcol = -1;
+
+	getmaxyx(stdscr, con->dim.y, con->dim.x);
+	con->dim.x++;
+	con->dim.y++;
+}
 

@@ -43,8 +43,16 @@ typedef struct Console {
 
 #include "rgb.h"
 
-/* initialize a Console struct */
+/* initialize a Console struct and set backend type. does not initialize
+   graphics mode yet so console_getbackendtype() can be queried before the
+   terminal goes into some weird mode. */
 void console_init(struct Console* self);
+
+/* must be called after console_init() - initializes the graphics mode.
+   in case the backend is a terminal, the terminal will be put into
+   a "painters mode", and the resolution and font arguments ignored. */
+void console_init_graphics(Console* self, point resolution, font* fnt);
+
 /* cleanup restores the original term behaviour and releases acquired resources. */
 void console_cleanup(struct Console* self);
 int console_getcolorcount(Console *self);
@@ -98,8 +106,6 @@ enum ConsoleBackend console_getbackendtype(Console *c);
 
 /* sdl-specific, only implemented in SDL backend. */
 void console_toggle_fullscreen(Console *c);
-/* must be called after console_init() */
-void console_init_graphics(Console* self, point resolution, font* fnt);
 
 /*
 TODO :

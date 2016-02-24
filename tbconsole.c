@@ -27,11 +27,6 @@ static const rgb_t tbcolors[] = {
 void console_init(struct Console* self) {
 	memset(self, 0, sizeof(struct Console));
 	self->backendtype = cb_termbox;
-	tb_init();
-	tb_select_input_mode(TB_INPUT_ESC);
-	tb_clear();
-	self->dim.x = tb_width();
-	self->dim.y = tb_height();	
 }
 
 /* cleanup restores the original term behaviour and releases acquired resources. */
@@ -244,4 +239,12 @@ void console_blink_cursor(struct Console* self) { (void) self; }
 void console_lock(void) {}
 void console_unlock(void) {}
 void console_toggle_fullscreen(struct Console* self) { (void) self; }
-void console_init_graphics(Console* self, point resolution, font* fnt) {(void) self; (void) resolution; (void) fnt;}
+
+void console_init_graphics(Console* self, point resolution, font* fnt) {
+	(void) resolution; (void) fnt;
+	tb_init();
+	tb_select_input_mode(TB_INPUT_ESC);
+	tb_clear();
+	self->dim.x = tb_width();
+	self->dim.y = tb_height();
+}

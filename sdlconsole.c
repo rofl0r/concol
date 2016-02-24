@@ -24,6 +24,9 @@ static SDL_mutex *screens_lock;
 void console_init(struct Console *self) {
 	memset(self, 0, sizeof(struct Console));
 	self->backendtype = cb_sdl;
+}
+
+void console_init_graphics(Console* self, point resolution, font* fnt) {
 	struct SDLConsole *c = &self->backend.sdl;
 	c->paintmode = 0;
 	c->cursorblink = 1;
@@ -31,10 +34,7 @@ void console_init(struct Console *self) {
 	self->automove = 0;
 	self->isblinking = 0;
 	c->surface = NULL;
-}
 
-void console_init_graphics(Console* self, point resolution, font* fnt) {
-	struct SDLConsole *c = &self->backend.sdl;
 #ifndef CONSOLE_FONT
 	if(!fnt) fnt = &testfont;
 #endif
