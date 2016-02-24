@@ -76,6 +76,8 @@ int console_setcolor(struct Console* self, int is_fg, rgb_t mycolor) {
 	return 1;
 }
 
+int console_getcolorcount(Console *self) { (void) self; return 8; }
+
 void console_initoutput(struct Console* self) { (void) self; }
 
 /* get width and height of the console display (in characters) */

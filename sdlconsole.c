@@ -58,6 +58,8 @@ void console_cleanup(Console* self) {
 	SDL_Quit();
 }
 
+int console_getcolorcount(Console *self) { (void) self; return 256; }
+
 void console_initoutput(Console* self) {(void) self;}
 
 void console_clear(Console* self) {

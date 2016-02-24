@@ -154,6 +154,12 @@ void console_cleanup(struct Console* con) {
 	pthread_mutex_destroy(&resize_mutex);
 }
 
+int console_getcolorcount(Console *c) {
+	(void) c;
+	if(!strncmp(c->backend.nc.org_term,"rxvt-unicode",12)) return 64;
+	return COLORS > 256 ? 256 : COLORS;
+}
+
 static void console_savecolors(struct NcConsole *self) {
 	short int i;
 	short int r,g,b;

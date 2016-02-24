@@ -47,6 +47,7 @@ typedef struct Console {
 void console_init(struct Console* self);
 /* cleanup restores the original term behaviour and releases acquired resources. */
 void console_cleanup(struct Console* self);
+int console_getcolorcount(Console *self);
 
 int console_setcolor(struct Console* self, int is_fg, rgb_t mycolor);
 int console_setcolors(struct Console* self, rgb_t bgcolor, rgb_t fgcolor);
