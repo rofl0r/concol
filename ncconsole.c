@@ -204,7 +204,7 @@ static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t
 	if(dbg) fprintf(dbg, "init_color: %d (%d, %d, %d)\n", colornumber+1, nr, ng, nb);
 #endif
 
-	return init_color(colornumber+MIN_COLOR_NUMBER, nr, ng, nb) != FALSE;
+	return init_color(colornumber+MIN_COLOR_NUMBER, nr, ng, nb) != ERR;
 }
 
 int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
