@@ -14,6 +14,7 @@ CFLAGS="-Wall -DCONSOLE_BACKEND=TERMBOX_CONSOLE -L ../../termbox" rcb --new --fo
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <stdio.h>
 #define _GNU_SOURCE
 #include <math.h>
 
@@ -48,7 +49,7 @@ static float sinvalc4(float time, float x, float y) {
 	float v2 = sinval4(time, x, y);
 	float v3 = sinval5(time, x, y);
 	float v4 = sinval3(time, x, y);
-	return (v1+v2+v3+v4)/2.0;
+	return (v1+v2+v3+v4)/4.0;
 }
 
 static unsigned float_to_col(float c) {
@@ -88,9 +89,7 @@ static unsigned color5(float v) {
 	return floats_to_col(c,c,c);
 }
 
-static unsigned char pal_idx(float f) {
-	return 128+f*127.f;
-}
+static unsigned char pal_idx(float f);
 
 typedef struct bmp4 {
 	unsigned width, height;
@@ -135,10 +134,22 @@ static void draw(Console *t, bmp4* b) {
 }
 
 unsigned pal[256];
-void gen_pal(colorcb color) {
+int cols;
+void gen_pal(Console* c, colorcb color) {
+	cols=console_getcolorcount(c);
+	if(cols>256) cols=256;
+	float h = (cols/2)-1;
+	int cm = cols/2;
 	int i;
-	for(i=0;i<256;i++) pal[i] = color((float)(i - 128)/128.0f);
+	for(i=0;i<cols;i++) pal[i] = color((float)(i - cm)/h);
 }
+static unsigned char pal_idx(float f) {
+	float h = (cols/2)-1;
+	int res = (cols/2)+f*h;
+	//if(pal[res]==0) dprintf(666, "res %d, f %f\n", res, f);
+	return res;
+}
+
 
 int main() {
 	Console co;
@@ -151,7 +162,7 @@ int main() {
 	console_getbounds(t, &dim.w, &dim.h);
 
 	bmp4* r  = bmp4_new(dim.w, dim.h);
-	gen_pal(color3);
+	gen_pal(t, color3);
 	float time = getpid();
 	int k;
 	while((k = console_getkey_nb(t)) == CK_UNDEF || !(k & CK_MASK)) {
@@ -160,6 +171,6 @@ int main() {
 		console_sleep(t, 30);
 	}
 	console_cleanup(t);
-	printf("got %d\n", k);
+	printf("got %d, cols %d\n", k, cols);
 }
 
