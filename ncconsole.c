@@ -30,11 +30,13 @@
 #define MIN_COLORPAIR_NUMBER 1
 #define MIN_COLOR_NUMBER 0
 
-//#define CONSOLE_DEBUG
 static rgb_t invalid_color = RGB_INIT(0,0,0);
 
 #ifdef CONSOLE_DEBUG
 static FILE* dbg = NULL;
+#define PDEBUG(fmt, args...) do { if(dbg) fprintf(dbg, fmt, ## args); } while(0)
+#else
+#define PDEBUG(fmt, args...) do {} while (0)
 #endif
 
 static void console_savecolors(struct NcConsole* self);
@@ -115,9 +117,7 @@ void console_init(struct Console* con) {
 		mouseinterval(0) /* prevent ncurses from making click events.
 		this way we always get an event for buttondown and up.
 		we won't get any mouse movement events either way. */;
-#ifdef CONSOLE_DEBUG
-	fprintf(dbg, "hasmouse: %d\n", (int) self->hasMouse);
-#endif
+	PDEBUG("hasmouse: %d\n", (int) self->hasMouse);
 	self->lastattr = 0;
 
 	self->maxcolor = 0;
@@ -187,9 +187,7 @@ static void console_restorecolors(struct NcConsole *self) {
 
 // needs color additionally to be used by restorecolors
 static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t color) {
-#ifdef CONSOLE_DEBUG
-	if(dbg) fprintf(dbg, "setcursescolor: %d (%d, %d, %d)\n", colornumber, color.r, color.g, color.b);
-#endif
+	PDEBUG("setcursescolor: %d (%d, %d, %d)\n", colornumber, color.r, color.g, color.b);
 
 	if(colornumber >= CONSOLE_COLORPAIRCOUNT) return 0;
 
@@ -200,9 +198,7 @@ static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t
 	int ng = console_tothousand(color.g);
 	int nb = console_tothousand(color.b);
 
-#ifdef CONSOLE_DEBUG
-	if(dbg) fprintf(dbg, "init_color: %d (%d, %d, %d)\n", colornumber+1, nr, ng, nb);
-#endif
+	PDEBUG("init_color: %d (%d, %d, %d)\n", colornumber+1, nr, ng, nb);
 
 	return init_color(colornumber+MIN_COLOR_NUMBER, nr, ng, nb) != ERR;
 }
@@ -212,10 +208,7 @@ int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
 	int i;
 	int* which = is_fg ? &self->active.fgcol : &self->active.bgcol;
 
-#ifdef CONSOLE_DEBUG
-	if(dbg) fprintf(dbg, "setcolor: (%d, %d, %d), fg: %d\n", mycolor.r, mycolor.g, mycolor.b, is_fg);
-#endif
-
+	PDEBUG("setcolor: (%d, %d, %d), fg: %d\n", mycolor.r, mycolor.g, mycolor.b, is_fg);
 
 	// see if it's the actual color...
 	if (*which >= 0) {
@@ -226,14 +219,12 @@ int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
 	for (i = 0; i < CONSOLE_COLORPAIRCOUNT; i++) {
 		if (self->colors[i].asInt == invalid_color.asInt) {
 				self->colors[i] = mycolor;
-				console_setcursescolor(self, i, mycolor);
+				if(!console_setcursescolor(self, i, mycolor))
+					PDEBUG("setting color failed\n");
 				if (i > self->maxcolor) self->maxcolor = i;
 				found:
 				*which = i;
-#ifdef CONSOLE_DEBUG
-				if(dbg) fprintf(dbg, "found at: %d\n", i);
-#endif
-
+				PDEBUG("found at: %d\n", i);
 				return 1;
 		} else if (self->colors[i].asInt == mycolor.asInt)
 			goto found;
@@ -250,9 +241,7 @@ void console_initoutput(struct Console* con) {
 	if(self->lastused.fgcol == self->active.fgcol && self->lastused.bgcol == self->active.bgcol)
 		return;
 
-#ifdef CONSOLE_DEBUG
-	if(dbg) fprintf(dbg, "initoutput: with fg: %d, bg: %d\n", self->active.fgcol, self->active.bgcol);
-#endif
+	PDEBUG("initoutput: with fg: %d, bg: %d\n", self->active.fgcol, self->active.bgcol);
 
 	for(i = 0; i < CONSOLE_COLORPAIRCOUNT; i++) {
 		if(self->termPairs[i].fgcol == self->active.fgcol) {
@@ -274,9 +263,7 @@ void console_initoutput(struct Console* con) {
 static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int bgcol) {
 	if(fgcol >= CONSOLE_COLORPAIRCOUNT || bgcol >= CONSOLE_COLORPAIRCOUNT) return 0; // "color pair is out of index");
 	if (!self->hasColors) return 0;
-#ifdef CONSOLE_DEBUG
-	if(dbg) fprintf(dbg, "setcolorpair: %d (fg: %d, bg: %d)\n", pair, fgcol, bgcol);
-#endif
+	PDEBUG("setcolorpair: %d (fg: %d, bg: %d)\n", pair, fgcol, bgcol);
 
 	self->termPairs[pair].fgcol = fgcol;
 	self->termPairs[pair].bgcol = bgcol;
@@ -406,11 +393,10 @@ static int translate_event(struct Console *self, int key) {
 				self->mouse.mouse_ev = ME_MOVE;
 				self->mouse.button = MB_NONE;
 			}
-#ifdef CONSOLE_DEBUG
-			fprintf(dbg, "x: %d, y:%d, button: %d, ev: %d, stage: %ld\n", 
+			PDEBUG("x: %d, y:%d, button: %d, ev: %d, stage: %ld\n",
 			       self->mouse.coords.x, self->mouse.coords.y, self->mouse.button,
 			       self->mouse.mouse_ev, (long) mouse_ev.bstate);
-#endif
+
 			ret |= check_modifier_state(mouse_ev.bstate);
 			break;
 		case KEY_RESIZE:
@@ -453,9 +439,7 @@ int console_getkey(struct Console* con) {
 	int ret = wgetch(stdscr);
 	int res = translate_event(con, ret);
 	if(res == CK_RESIZE_EVENT) deal_with_resize_signal();
-#ifdef CONSOLE_DEBUG
-	fprintf(dbg, "getkey res: %d\n", res);
-#endif
+	PDEBUG("getkey res: %d\n", res);
 	return res;
 }
 
