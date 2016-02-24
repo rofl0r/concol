@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <signal.h>
 #include "console_keys.h"
+#include "color_reader.h"
 
 #include "ncconsole_chartab.c"
 
@@ -107,13 +108,13 @@ void console_init(struct Console* con) {
 	dbg = fopen("console.log", "w");
 #endif
 
-
 	self->hasColors = has_colors();
 	self->canChangeColors = self->hasColors ? can_change_color() : 0;
-	if (self->hasColors) start_color();
 
 	if (self->canChangeColors)
 		console_savecolors(self);
+
+	if (self->hasColors) start_color();
 
 	if((self->hasMouse = (mousemask(ALL_MOUSE_EVENTS |
 		BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED |
@@ -157,10 +158,17 @@ static void console_savecolors(struct NcConsole *self) {
 	short int i;
 	short int r,g,b;
 	short int fg, bg;
-	for (i = MIN_COLOR_NUMBER; i < CONSOLE_COLORPAIRCOUNT; i++) {
-		color_content(i, &r, &g, &b);
-		self->org_colors[i] = RGB(console_fromthousand(r), console_fromthousand(g), console_fromthousand(b));
+	struct color_reader cr;
+	int use_cr;
+	use_cr = !color_reader_init(&cr);
+	for (i = MIN_COLOR_NUMBER; i < 16; i++) {
+		if(use_cr) color_reader_get_color(&cr, i, &self->org_colors[i]);
+		else {
+			color_content(i, &r, &g, &b);
+			self->org_colors[i] = RGB(console_fromthousand(r), console_fromthousand(g), console_fromthousand(b));
+		}
 	}
+	if(use_cr) color_reader_close(&cr);
 	for (i = MIN_COLORPAIR_NUMBER; i < CONSOLE_COLORPAIRCOUNT; i++) {
 		pair_content(i, &fg, &bg);
 		self->org_fgcolors[i] = fg;
