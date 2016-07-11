@@ -28,6 +28,7 @@
 #include "ncconsole_chartab.c"
 
 #define MIN_PAIR 1
+#define MAX_PAIR (CONSOLE_COLORPAIRCOUNT-1)
 #define MIN_COLOR 0
 
 static rgb_t invalid_color = RGB_INIT(0,0,0);
@@ -61,7 +62,7 @@ static inline int console_tothousand(int in) {
 static inline void console_inittables(struct Console* self) {
 	struct NcConsole *con = &self->backend.nc;
 	int i;
-	for (i = 0; i < CONSOLE_COLORPAIRCOUNT; i++) {
+	for (i = 0; i <= MAX_PAIR; i++) {
 		con->colors[i] = invalid_color;
 		con->pairs[i].fgcol = -1;
 		con->pairs[i].bgcol = -1;
@@ -109,7 +110,7 @@ static void console_savecolors(struct NcConsole *self) {
 		}
 	}
 	if(use_cr) color_reader_close(&cr);
-	for (i = MIN_PAIR; i < CONSOLE_COLORPAIRCOUNT; i++) {
+	for (i = MIN_PAIR; i <= MAX_PAIR; i++) {
 		pair_content(i, &fg, &bg);
 		self->org_fgcolors[i] = fg;
 		self->org_bgcolors[i] = bg;
@@ -134,7 +135,7 @@ static void console_restorecolors(struct NcConsole *self) {
 static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t color) {
 	PDEBUG("setcursescolor: %d (%d, %d, %d)\n", colornumber, color.r, color.g, color.b);
 
-	if(colornumber >= CONSOLE_COLORPAIRCOUNT) return 0;
+	if(colornumber > MAX_PAIR) return 0;
 
 	// we use rgb values in the range 0-0xFF, while ncurses max is 1000
 	if(!self->canChangeColors) return 0;
@@ -161,7 +162,7 @@ int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
 	}
 
 	// this (c|sh)ould be optimized by using a hashmap
-	for (i = 0; i < CONSOLE_COLORPAIRCOUNT; i++) {
+	for (i = 0; i <= MAX_PAIR; i++) {
 		if (self->colors[i].asInt == invalid_color.asInt) {
 				self->colors[i] = mycolor;
 				if(!console_setcursescolor(self, i, mycolor))
@@ -188,7 +189,7 @@ void console_initoutput(struct Console* con) {
 
 	PDEBUG("initoutput: with fg: %d, bg: %d\n", self->active.fgcol, self->active.bgcol);
 
-	for(i = 0; i < CONSOLE_COLORPAIRCOUNT; i++) {
+	for(i = 0; i <= MAX_PAIR; i++) {
 		if(self->pairs[i].fgcol == self->active.fgcol) {
 				if (self->pairs[i].bgcol != self->active.bgcol)
 					continue;
@@ -206,7 +207,7 @@ void console_initoutput(struct Console* con) {
 }
 
 static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int bgcol) {
-	if(fgcol >= CONSOLE_COLORPAIRCOUNT || bgcol >= CONSOLE_COLORPAIRCOUNT) return 0; // "color pair is out of index");
+	if(fgcol > MAX_PAIR || bgcol > MAX_PAIR) return 0; // "color pair is out of index");
 	if (!self->hasColors) return 0;
 	PDEBUG("setcolorpair: %d (fg: %d, bg: %d)\n", pair, fgcol, bgcol);
 
@@ -216,7 +217,7 @@ static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int
 }
 
 static int console_usecolorpair(struct NcConsole* self, int pair) {
-	if(pair >= CONSOLE_COLORPAIRCOUNT) return 0;
+	if(pair > MAX_PAIR) return 0;
 	if (!self->hasColors) return 0;
 	self->lastused.fgcol = self->active.fgcol;
 	self->lastused.bgcol = self->active.bgcol;
