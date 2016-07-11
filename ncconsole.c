@@ -28,7 +28,7 @@
 #include "ncconsole_chartab.c"
 
 #define MIN_PAIR 1
-#define MIN_COLOR_NUMBER 0
+#define MIN_COLOR 0
 
 static rgb_t invalid_color = RGB_INIT(0,0,0);
 
@@ -101,7 +101,7 @@ static void console_savecolors(struct NcConsole *self) {
 	int use_cr;
 	use_cr = !color_reader_init(&cr);
 	int maxc = COLORS > 16 ? 16 : COLORS;
-	for (i = MIN_COLOR_NUMBER; i < maxc; i++) {
+	for (i = MIN_COLOR; i < maxc; i++) {
 		if(use_cr) color_reader_get_color(&cr, i, &self->org_colors[i]);
 		else {
 			color_content(i, &r, &g, &b);
@@ -118,7 +118,7 @@ static void console_savecolors(struct NcConsole *self) {
 
 static void console_restorecolors(struct NcConsole *self) {
 	int i;
-	for (i = MIN_COLOR_NUMBER; i <= self->maxcolor; i++) {
+	for (i = MIN_COLOR; i <= self->maxcolor; i++) {
 		init_color(i,
 			console_tothousand(self->org_colors[i].r),
 			console_tothousand(self->org_colors[i].g),
@@ -145,7 +145,7 @@ static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t
 
 	PDEBUG("init_color: %d (%d, %d, %d)\n", colornumber+1, nr, ng, nb);
 
-	return init_color(colornumber+MIN_COLOR_NUMBER, nr, ng, nb) != ERR;
+	return init_color(colornumber+MIN_COLOR, nr, ng, nb) != ERR;
 }
 
 int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
@@ -212,7 +212,7 @@ static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int
 
 	self->pairs[pair].fgcol = fgcol;
 	self->pairs[pair].bgcol = bgcol;
-	return init_pair(pair+MIN_PAIR, fgcol+MIN_COLOR_NUMBER, bgcol+MIN_COLOR_NUMBER) != FALSE;
+	return init_pair(pair+MIN_PAIR, fgcol+MIN_COLOR, bgcol+MIN_COLOR) != FALSE;
 }
 
 static int console_usecolorpair(struct NcConsole* self, int pair) {
