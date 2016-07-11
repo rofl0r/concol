@@ -91,9 +91,7 @@ void console_cleanup(struct Console* con) {
 }
 
 int console_getcolorcount(Console *c) {
-	(void) c;
-	if(!strncmp(c->backend.nc.org_term,"rxvt-unicode",12)) return 64;
-	return COLORS > 256 ? 256 : COLORS;
+	return c->backend.nc.maxcolors;
 }
 
 static void console_savecolors(struct NcConsole *self) {
@@ -103,7 +101,7 @@ static void console_savecolors(struct NcConsole *self) {
 	struct color_reader cr;
 	int use_cr;
 	use_cr = !color_reader_init(&cr);
-	int maxc = MIN(COLORS, CONSOLE_MAXSAVECOLORS);
+	int maxc = MIN(self->maxcolors, CONSOLE_MAXSAVECOLORS);
 	for (i = MIN_COLOR; i < maxc; i++) {
 		if(use_cr) color_reader_get_color(&cr, i, &self->org_colors[i]);
 		else {
@@ -120,7 +118,7 @@ static void console_savecolors(struct NcConsole *self) {
 }
 
 static void console_restorecolors(struct NcConsole *self) {
-	int i, maxc = MIN(COLORS, CONSOLE_MAXSAVECOLORS);
+	int i, maxc = MIN(self->maxcolors, CONSOLE_MAXSAVECOLORS);
 	for (i = MIN_COLOR; i < maxc; i++) {
 		init_color(i,
 			console_tothousand(self->org_colors[i].r),
@@ -424,6 +422,11 @@ void console_lock(void) {}
 void console_unlock(void) {}
 void console_toggle_fullscreen(struct Console* self) { (void) self; }
 
+static int get_maxcolors(NcConsole *self) {
+	if(!strncmp(self->org_term,"rxvt-unicode",12)) return 64;
+	return COLORS > 256 ? 256 : COLORS;
+}
+
 void console_init_graphics(Console* con, point resolution, font* fnt) {
 	(void) resolution; (void) fnt;
 
@@ -459,6 +462,7 @@ void console_init_graphics(Console* con, point resolution, font* fnt) {
 	self->canChangeColors = self->hasColors ? can_change_color() : 0;
 
 	if (self->hasColors) start_color();
+	self->maxcolors = get_maxcolors(self);
 
 	if (self->canChangeColors)
 		console_savecolors(self);

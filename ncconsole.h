@@ -99,6 +99,7 @@ typedef struct NcConsole {
 	rgb_t org_colors[CONSOLE_MAXSAVECOLORS];
 	short int org_fgcolors[CONSOLE_MAXSAVECOLORS];
 	short int org_bgcolors[CONSOLE_MAXSAVECOLORS];
+	short maxcolors;
 } NcConsole;
 
 #endif
