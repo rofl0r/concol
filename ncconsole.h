@@ -86,7 +86,7 @@ typedef struct NcConsole {
 	int hasColors:1;
 	int canChangeColors:1;
 	int hasMouse:1;
-	int maxcolor;
+	short maxcolor;
 
 	//attr_t lastattr;
 	unsigned int lastattr;
