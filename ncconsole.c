@@ -27,7 +27,7 @@
 
 #include "ncconsole_chartab.c"
 
-#define MIN_COLORPAIR_NUMBER 1
+#define MIN_PAIR 1
 #define MIN_COLOR_NUMBER 0
 
 static rgb_t invalid_color = RGB_INIT(0,0,0);
@@ -109,7 +109,7 @@ static void console_savecolors(struct NcConsole *self) {
 		}
 	}
 	if(use_cr) color_reader_close(&cr);
-	for (i = MIN_COLORPAIR_NUMBER; i < CONSOLE_COLORPAIRCOUNT; i++) {
+	for (i = MIN_PAIR; i < CONSOLE_COLORPAIRCOUNT; i++) {
 		pair_content(i, &fg, &bg);
 		self->org_fgcolors[i] = fg;
 		self->org_bgcolors[i] = bg;
@@ -125,7 +125,7 @@ static void console_restorecolors(struct NcConsole *self) {
 			console_tothousand(self->org_colors[i].b)
 		);
 	}
-	for (i = MIN_COLORPAIR_NUMBER; i < self->maxcolor + MIN_COLORPAIR_NUMBER; i++) {
+	for (i = MIN_PAIR; i < self->maxcolor + MIN_PAIR; i++) {
 		init_pair(i, self->org_fgcolors[i], self->org_bgcolors[i]);
 	}
 }
@@ -212,7 +212,7 @@ static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int
 
 	self->termPairs[pair].fgcol = fgcol;
 	self->termPairs[pair].bgcol = bgcol;
-	return init_pair(pair+MIN_COLORPAIR_NUMBER, fgcol+MIN_COLOR_NUMBER, bgcol+MIN_COLOR_NUMBER) != FALSE;
+	return init_pair(pair+MIN_PAIR, fgcol+MIN_COLOR_NUMBER, bgcol+MIN_COLOR_NUMBER) != FALSE;
 }
 
 static int console_usecolorpair(struct NcConsole* self, int pair) {
@@ -222,8 +222,8 @@ static int console_usecolorpair(struct NcConsole* self, int pair) {
 	self->lastused.bgcol = self->active.bgcol;
 
 	//if (self->lastattr) wattr_off(stdscr,self->lastattr,NULL);
-	self->lastattr = COLOR_PAIR(pair + MIN_COLORPAIR_NUMBER);
-	color_set(pair + MIN_COLORPAIR_NUMBER, NULL);
+	self->lastattr = COLOR_PAIR(pair + MIN_PAIR);
+	color_set(pair + MIN_PAIR, NULL);
 	//wattr_on(stdscr, self->lastattr, NULL);
 	return 1;
 }
