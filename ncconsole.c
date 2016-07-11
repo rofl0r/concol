@@ -31,7 +31,7 @@
 #define MAX_PAIR (CONSOLE_COLORPAIRCOUNT-1)
 #define MIN_COLOR 0
 
-static rgb_t invalid_color = RGB_INIT(0,0,0);
+static const rgb_t invalid_color = RGBA_INIT(0,0,0,255);
 
 #ifdef CONSOLE_DEBUG
 static FILE* dbg = NULL;
@@ -431,7 +431,7 @@ void console_init_graphics(Console* con, point resolution, font* fnt) {
 		setenv("TERM", "xterm-256color", 1);
 	else if(!strcmp(self->org_term, "rxvt-unicode"))
 		setenv("TERM", "rxvt-unicode-256color", 1);
-	invalid_color.a = 255;
+
 	self->active.fgcol = -1;
 	self->active.fgcol = -1;
 
