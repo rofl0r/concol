@@ -75,6 +75,7 @@
 #include "console.h"
 
 #define CONSOLE_COLORPAIRCOUNT 256
+#define CONSOLE_MAXSAVECOLORS 16
 
 typedef struct {
 	short int fgcol;
@@ -94,10 +95,10 @@ typedef struct NcConsole {
 	Colorpair active;
 	Colorpair pairs[CONSOLE_COLORPAIRCOUNT];
 	rgb_t colors[CONSOLE_COLORPAIRCOUNT];
-	
-	rgb_t org_colors[CONSOLE_COLORPAIRCOUNT];
-	short int org_fgcolors[CONSOLE_COLORPAIRCOUNT];
-	short int org_bgcolors[CONSOLE_COLORPAIRCOUNT];
+
+	rgb_t org_colors[CONSOLE_MAXSAVECOLORS];
+	short int org_fgcolors[CONSOLE_MAXSAVECOLORS];
+	short int org_bgcolors[CONSOLE_MAXSAVECOLORS];
 } NcConsole;
 
 #endif

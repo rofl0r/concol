@@ -31,6 +31,8 @@
 #define MAX_PAIR (CONSOLE_COLORPAIRCOUNT-1)
 #define MIN_COLOR 0
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 static const rgb_t invalid_color = RGBA_INIT(0,0,0,255);
 
 #ifdef CONSOLE_DEBUG
@@ -101,7 +103,7 @@ static void console_savecolors(struct NcConsole *self) {
 	struct color_reader cr;
 	int use_cr;
 	use_cr = !color_reader_init(&cr);
-	int maxc = COLORS > 16 ? 16 : COLORS;
+	int maxc = MIN(COLORS, CONSOLE_MAXSAVECOLORS);
 	for (i = MIN_COLOR; i < maxc; i++) {
 		if(use_cr) color_reader_get_color(&cr, i, &self->org_colors[i]);
 		else {
@@ -110,25 +112,26 @@ static void console_savecolors(struct NcConsole *self) {
 		}
 	}
 	if(use_cr) color_reader_close(&cr);
-	for (i = MIN_PAIR; i <= MAX_PAIR; i++) {
+	for (i = MIN_PAIR; i < maxc+MIN_PAIR; i++) {
 		pair_content(i, &fg, &bg);
-		self->org_fgcolors[i] = fg;
-		self->org_bgcolors[i] = bg;
+		self->org_fgcolors[i-MIN_PAIR] = fg;
+		self->org_bgcolors[i-MIN_PAIR] = bg;
 	}
 }
 
 static void console_restorecolors(struct NcConsole *self) {
-	int i;
-	for (i = MIN_COLOR; i <= self->maxcolor; i++) {
+	int i, maxc = MIN(COLORS, CONSOLE_MAXSAVECOLORS);
+	for (i = MIN_COLOR; i < maxc; i++) {
 		init_color(i,
 			console_tothousand(self->org_colors[i].r),
 			console_tothousand(self->org_colors[i].g),
 			console_tothousand(self->org_colors[i].b)
 		);
 	}
-	for (i = MIN_PAIR; i < self->maxcolor + MIN_PAIR; i++) {
-		init_pair(i, self->org_fgcolors[i], self->org_bgcolors[i]);
+	for (i = MIN_PAIR; i < maxc+MIN_PAIR; i++) {
+		init_pair(i, self->org_fgcolors[i-MIN_PAIR], self->org_bgcolors[i-MIN_PAIR]);
 	}
+	color_set(MIN_PAIR, NULL);
 }
 
 // needs color additionally to be used by restorecolors
