@@ -42,6 +42,22 @@ static FILE* dbg = NULL;
 #define PDEBUG(fmt, args...) do {} while (0)
 #endif
 
+enum nc_flags {
+	NC_HASCOLORS = 1 << 0,
+	NC_CANCHANGECOLORS = 1 << 1,
+	NC_HASMOUSE = 1 << 2,
+};
+
+static inline int self_hasColors(struct NcConsole* self) {
+	return self->flags & NC_HASCOLORS;
+}
+static inline int self_canChangeColors(struct NcConsole* self) {
+	return self->flags & NC_CANCHANGECOLORS;
+}
+static inline int self_hasMouse(struct NcConsole* self) {
+	return self->flags & NC_HASMOUSE;
+}
+
 static void console_savecolors(struct NcConsole* self);
 static void console_restorecolors(struct NcConsole* self);
 static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t color);
@@ -81,7 +97,7 @@ void console_cleanup(struct Console* con) {
 	struct NcConsole *self = &con->backend.nc;
 	clear();
 	refresh();
-	if (self->canChangeColors) console_restorecolors(self);
+	if (self_canChangeColors(self)) console_restorecolors(self);
 	endwin();
 #ifdef CONSOLE_DEBUG
 	fclose(dbg);
@@ -138,7 +154,7 @@ static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t
 	if(colornumber > MAX_PAIR) return 0;
 
 	// we use rgb values in the range 0-0xFF, while ncurses max is 1000
-	if(!self->canChangeColors) return 0;
+	if(!self_canChangeColors(self)) return 0;
 
 	int nr = console_tothousand(color.r);
 	int ng = console_tothousand(color.g);
@@ -208,7 +224,7 @@ void console_initoutput(struct Console* con) {
 
 static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int bgcol) {
 	if(fgcol > MAX_PAIR || bgcol > MAX_PAIR) return 0; // "color pair is out of index");
-	if (!self->hasColors) return 0;
+	if (!self_hasColors(self)) return 0;
 	PDEBUG("setcolorpair: %d (fg: %d, bg: %d)\n", pair, fgcol, bgcol);
 
 	self->pairs[pair].fgcol = fgcol;
@@ -218,7 +234,7 @@ static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int
 
 static int console_usecolorpair(struct NcConsole* self, int pair) {
 	if(pair > MAX_PAIR) return 0;
-	if (!self->hasColors) return 0;
+	if (!self_hasColors(self)) return 0;
 	self->lastused.fgcol = self->active.fgcol;
 	self->lastused.bgcol = self->active.bgcol;
 
@@ -458,24 +474,27 @@ void console_init_graphics(Console* con, point resolution, font* fnt) {
 	dbg = fopen("console.log", "w");
 #endif
 
-	self->hasColors = has_colors();
-	self->canChangeColors = self->hasColors ? can_change_color() : 0;
+	if (has_colors()) self->flags |= NC_HASCOLORS;
+	if (self_hasColors(self) && can_change_color())
+		self->flags |= NC_CANCHANGECOLORS;
 
-	if (self->hasColors) start_color();
+	if (self_hasColors(self)) start_color();
 	self->maxcolors = get_maxcolors(org_term);
 
-	if (self->canChangeColors)
+	if (self_canChangeColors(self))
 		console_savecolors(self);
 
-	if((self->hasMouse = (mousemask(ALL_MOUSE_EVENTS |
+	if(mousemask(ALL_MOUSE_EVENTS |
 		BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED |
 		BUTTON1_RELEASED | BUTTON2_RELEASED | BUTTON3_RELEASED |
 		REPORT_MOUSE_POSITION | BUTTON_SHIFT | BUTTON_ALT | BUTTON_CTRL,
-		NULL) != (mmask_t) ERR)))
+		NULL) != (mmask_t) ERR) {
 		mouseinterval(0) /* prevent ncurses from making click events.
 		this way we always get an event for buttondown and up.
 		we won't get any mouse movement events either way. */;
-	PDEBUG("hasmouse: %d\n", (int) self->hasMouse);
+		self->flags |= NC_HASMOUSE;
+	}
+	PDEBUG("hasmouse: %d\n", self_hasMouse(self));
 	self->lastattr = 0;
 
 	self->maxcolor = 0;

@@ -83,9 +83,7 @@ typedef struct {
 } Colorpair;
 
 typedef struct NcConsole {
-	int hasColors:1;
-	int canChangeColors:1;
-	int hasMouse:1;
+	short flags;
 	short maxcolor;
 
 	//attr_t lastattr;
