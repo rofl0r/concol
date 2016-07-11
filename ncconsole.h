@@ -78,24 +78,24 @@
 #define CONSOLE_MAXSAVECOLORS 16
 
 typedef struct {
-	short int fgcol;
-	short int bgcol;
+	short fgcol;
+	short bgcol;
 } Colorpair;
 
 typedef struct NcConsole {
-	short flags;
-	short maxcolor;
+	unsigned lastattr;
+	rgb_t colors[CONSOLE_COLORPAIRCOUNT];
+	rgb_t org_colors[CONSOLE_MAXSAVECOLORS];
 
-	//attr_t lastattr;
-	unsigned int lastattr;
 	Colorpair lastused;
 	Colorpair active;
 	Colorpair pairs[CONSOLE_COLORPAIRCOUNT];
-	rgb_t colors[CONSOLE_COLORPAIRCOUNT];
 
-	rgb_t org_colors[CONSOLE_MAXSAVECOLORS];
-	short int org_fgcolors[CONSOLE_MAXSAVECOLORS];
-	short int org_bgcolors[CONSOLE_MAXSAVECOLORS];
+	short org_fgcolors[CONSOLE_MAXSAVECOLORS];
+	short org_bgcolors[CONSOLE_MAXSAVECOLORS];
+
+	short flags;
+	short maxcolor;
 	short maxcolors;
 } NcConsole;
 
