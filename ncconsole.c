@@ -86,7 +86,6 @@ void console_cleanup(struct Console* con) {
 #ifdef CONSOLE_DEBUG
 	fclose(dbg);
 #endif
-	setenv("TERM", self->org_term, 1);
 	pthread_mutex_destroy(&resize_mutex);
 }
 
@@ -422,20 +421,21 @@ void console_lock(void) {}
 void console_unlock(void) {}
 void console_toggle_fullscreen(struct Console* self) { (void) self; }
 
-static int get_maxcolors(NcConsole *self) {
-	if(!strncmp(self->org_term,"rxvt-unicode",12)) return 64;
+static int get_maxcolors(const char* orgterm) {
+	if(!strncmp(orgterm,"rxvt-unicode",12)) return 64;
 	return COLORS > 256 ? 256 : COLORS;
 }
 
 void console_init_graphics(Console* con, point resolution, font* fnt) {
 	(void) resolution; (void) fnt;
+	char org_term[64];
 
 	struct NcConsole *self = &con->backend.nc;
 
-	snprintf(self->org_term, sizeof(self->org_term), "%s", getenv("TERM"));
-	if(!strcmp(self->org_term, "xterm"))
+	snprintf(org_term, sizeof org_term, "%s", getenv("TERM"));
+	if(!strcmp(org_term, "xterm"))
 		setenv("TERM", "xterm-256color", 1);
-	else if(!strcmp(self->org_term, "rxvt-unicode"))
+	else if(!strcmp(org_term, "rxvt-unicode"))
 		setenv("TERM", "rxvt-unicode-256color", 1);
 
 	self->active.fgcol = -1;
@@ -462,7 +462,7 @@ void console_init_graphics(Console* con, point resolution, font* fnt) {
 	self->canChangeColors = self->hasColors ? can_change_color() : 0;
 
 	if (self->hasColors) start_color();
-	self->maxcolors = get_maxcolors(self);
+	self->maxcolors = get_maxcolors(org_term);
 
 	if (self->canChangeColors)
 		console_savecolors(self);

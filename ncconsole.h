@@ -83,7 +83,6 @@ typedef struct {
 } Colorpair;
 
 typedef struct NcConsole {
-	char org_term[32];
 	int hasColors:1;
 	int canChangeColors:1;
 	int hasMouse:1;
