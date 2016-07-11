@@ -458,10 +458,10 @@ void console_init_graphics(Console* con, point resolution, font* fnt) {
 	self->hasColors = has_colors();
 	self->canChangeColors = self->hasColors ? can_change_color() : 0;
 
+	if (self->hasColors) start_color();
+
 	if (self->canChangeColors)
 		console_savecolors(self);
-
-	if (self->hasColors) start_color();
 
 	if((self->hasMouse = (mousemask(ALL_MOUSE_EVENTS |
 		BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED |
