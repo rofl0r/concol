@@ -37,7 +37,7 @@ ifeq ($(BACKEND),termbox)
 	LINKLIBS=$(LINKLIBS_TERMBOX)
 else 
 	ifeq ($(BACKEND),ncurses)
-		BACKEND_SRCS=ncconsole.c
+		BACKEND_SRCS=ncconsole.c color_reader.c
 		LINKLIBS=$(LINKLIBS_NCURSES)
 	else
 		ifeq ($(BACKEND),sdl)
