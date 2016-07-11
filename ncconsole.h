@@ -92,7 +92,7 @@ typedef struct NcConsole {
 	unsigned int lastattr;
 	Colorpair lastused;
 	Colorpair active;
-	Colorpair termPairs[CONSOLE_COLORPAIRCOUNT];
+	Colorpair pairs[CONSOLE_COLORPAIRCOUNT];
 	rgb_t colors[CONSOLE_COLORPAIRCOUNT];
 	
 	rgb_t org_colors[CONSOLE_COLORPAIRCOUNT];

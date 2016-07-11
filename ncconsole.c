@@ -63,8 +63,8 @@ static inline void console_inittables(struct Console* self) {
 	int i;
 	for (i = 0; i < CONSOLE_COLORPAIRCOUNT; i++) {
 		con->colors[i] = invalid_color;
-		con->termPairs[i].fgcol = -1;
-		con->termPairs[i].bgcol = -1;
+		con->pairs[i].fgcol = -1;
+		con->pairs[i].bgcol = -1;
 	}
 }
 
@@ -189,14 +189,14 @@ void console_initoutput(struct Console* con) {
 	PDEBUG("initoutput: with fg: %d, bg: %d\n", self->active.fgcol, self->active.bgcol);
 
 	for(i = 0; i < CONSOLE_COLORPAIRCOUNT; i++) {
-		if(self->termPairs[i].fgcol == self->active.fgcol) {
-				if (self->termPairs[i].bgcol != self->active.bgcol)
+		if(self->pairs[i].fgcol == self->active.fgcol) {
+				if (self->pairs[i].bgcol != self->active.bgcol)
 					continue;
 				else {
 					console_usecolorpair(self, i);
 					return;
 				}
-		} else if (self->termPairs[i].fgcol == -1) {
+		} else if (self->pairs[i].fgcol == -1) {
 				console_setcolorpair(self, i, self->active.fgcol, self->active.bgcol);
 				console_usecolorpair(self, i);
 				return;
@@ -210,8 +210,8 @@ static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int
 	if (!self->hasColors) return 0;
 	PDEBUG("setcolorpair: %d (fg: %d, bg: %d)\n", pair, fgcol, bgcol);
 
-	self->termPairs[pair].fgcol = fgcol;
-	self->termPairs[pair].bgcol = bgcol;
+	self->pairs[pair].fgcol = fgcol;
+	self->pairs[pair].bgcol = bgcol;
 	return init_pair(pair+MIN_PAIR, fgcol+MIN_COLOR_NUMBER, bgcol+MIN_COLOR_NUMBER) != FALSE;
 }
 
