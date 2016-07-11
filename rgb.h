@@ -45,5 +45,6 @@ typedef struct {
 #endif
 
 #define RGB_INIT(R,G,B) {.r = R, .g = G, .b = B, .a = 0}
+#define RGBA_INIT(R,G,B,A) {.r = R, .g = G, .b = B, .a = A}
 
 #endif /* RGB_H_ */
