@@ -77,8 +77,8 @@
 #define CONSOLE_COLORPAIRCOUNT 256
 
 typedef struct {
-	int fgcol;
-	int bgcol;
+	short int fgcol;
+	short int bgcol;
 } Colorpair;
 
 typedef struct NcConsole {

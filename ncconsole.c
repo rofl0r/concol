@@ -152,7 +152,7 @@ static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t
 int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
 	struct NcConsole *self = &con->backend.nc;
 	int i;
-	int* which = is_fg ? &self->active.fgcol : &self->active.bgcol;
+	short* which = is_fg ? &self->active.fgcol : &self->active.bgcol;
 
 	PDEBUG("setcolor: (%d, %d, %d), fg: %d\n", mycolor.r, mycolor.g, mycolor.b, is_fg);
 
