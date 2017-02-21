@@ -503,8 +503,6 @@ void console_init_graphics(Console* con, point resolution, font* fnt) {
 	self->lastused.bgcol = -1;
 
 	getmaxyx(stdscr, con->dim.y, con->dim.x);
-	con->dim.x++;
-	con->dim.y++;
 }
 
 void console_settitle(Console *self, const char *title) {
