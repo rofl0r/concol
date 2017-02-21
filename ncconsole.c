@@ -248,8 +248,8 @@ static int console_usecolorpair(struct NcConsole* self, int pair) {
 void console_getbounds(struct Console* self, int* x, int* y) {
 	if(stdscr) {
 		getmaxyx(stdscr, self->dim.y, self->dim.x);
-		*x = ++self->dim.x;
-		*y = ++self->dim.y;
+		*x = self->dim.x;
+		*y = self->dim.y;
 	} else {
 		*y = -1;
 		*x = -1;
