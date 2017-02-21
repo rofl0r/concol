@@ -507,3 +507,7 @@ void console_init_graphics(Console* con, point resolution, font* fnt) {
 	con->dim.y++;
 }
 
+void console_settitle(Console *self, const char *title) {
+	(void) self;
+	(void) title;
+}

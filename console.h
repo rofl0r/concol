@@ -106,6 +106,7 @@ enum ConsoleBackend console_getbackendtype(Console *c);
 
 /* sdl-specific, only implemented in SDL backend. */
 void console_toggle_fullscreen(Console *c);
+void console_settitle(Console *c, const char *title);
 
 /*
 TODO :

@@ -248,3 +248,9 @@ void console_init_graphics(Console* self, point resolution, font* fnt) {
 	self->dim.x = tb_width();
 	self->dim.y = tb_height();
 }
+
+void console_settitle(Console *self, const char *title) {
+	(void) self;
+	(void) title;
+}
+

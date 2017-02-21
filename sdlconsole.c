@@ -25,6 +25,10 @@ void console_init(struct Console *self) {
 	memset(self, 0, sizeof(struct Console));
 	self->backendtype = cb_sdl;
 }
+void console_settitle(Console *self, const char *title) {
+	(void) self;
+	SDL_WM_SetCaption(title, NULL);
+}
 
 void console_init_graphics(Console* self, point resolution, font* fnt) {
 	struct SDLConsole *c = &self->backend.sdl;
@@ -47,7 +51,7 @@ void console_init_graphics(Console* self, point resolution, font* fnt) {
 	c->fnt = fnt;
 	console_resize(self, resolution.x, resolution.y);
 	//c->fnt = bitfont_to_font(&int10_font_16);
-	SDL_WM_SetCaption("sdl-console", NULL);
+	console_settitle(self, "sdl-console");
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 }
 
