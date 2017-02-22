@@ -264,17 +264,21 @@ void console_putchar(Console* self, int ch, int doupdate) {
 	console_unblink(self);
 	console_lock();
 	char* char_data = bitfont_get_char(c->fnt, ch & 0xff), *font = char_data;
-	sdl_rgb_t *ptr = (sdl_rgb_t *) ((SDL_Surface*) c->surface)->pixels;
+	int pitch_div_4 = (((SDL_Surface*) c->surface)->pitch / 4);
+	sdl_rgb_t *ptr = (sdl_rgb_t *) ((SDL_Surface*) c->surface)->pixels, *out;
+	ptr += self->cursor.y * c->fnt->dim.y * pitch_div_4;
 	sdl_rgb_t *color;
 	int lineoffset;
-	int pitch_div_4 = (((SDL_Surface*) c->surface)->pitch / 4);
-	int x, y, rx, ry;
-	for (y = 0, ry = self->cursor.y * c->fnt->dim.y, lineoffset=ry*pitch_div_4;
+	int x, y, ry;
+	size_t pixel_x_off = self->cursor.x * c->fnt->dim.x;
+	for (y = 0, ry = self->cursor.y * c->fnt->dim.y;
 	     y < c->fnt->dim.y;
-	     y++, ry++,lineoffset+=pitch_div_4) {
-		for (x = 0, rx = self->cursor.x * c->fnt->dim.x; x < c->fnt->dim.x; x++, rx++, font++) {
+	     y++, ry++, ptr += pitch_div_4) {
+		for (x = 0, out=ptr+pixel_x_off;
+		     x < c->fnt->dim.x;
+		     x++, font++, out++) {
 			color = *font ? &c->color.fgcolor : &c->color.bgcolor;
-			ptr[lineoffset + rx] = *color;
+			*out = *color;
 		}
 	}
 	if(doupdate) SDL_UpdateRect(c->surface, self->cursor.x * c->fnt->dim.x ,self->cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
