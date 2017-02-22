@@ -272,8 +272,9 @@ void console_putchar(Console* self, int ch, int doupdate) {
 	for (y = 0, ry = self->cursor.y * c->fnt->dim.y, lineoffset=ry*pitch_div_4;
 	     y < c->fnt->dim.y;
 	     y++, ry++,lineoffset+=pitch_div_4) {
-		for (x = 0, rx = self->cursor.x * c->fnt->dim.x; x < c->fnt->dim.x; x++, rx++) {
-			color = char_data[y * c->fnt->dim.x + x] ? &c->color.fgcolor : &c->color.bgcolor;
+		char *font = char_data + y * c->fnt->dim.x;
+		for (x = 0, rx = self->cursor.x * c->fnt->dim.x; x < c->fnt->dim.x; x++, rx++, font++) {
+			color = *font ? &c->color.fgcolor : &c->color.bgcolor;
 			ptr[lineoffset + rx] = *color;
 		}
 	}
