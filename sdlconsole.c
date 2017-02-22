@@ -263,7 +263,7 @@ void console_putchar(Console* self, int ch, int doupdate) {
 	struct SDLConsole *c = &self->backend.sdl;
 	console_unblink(self);
 	console_lock();
-	char* char_data = bitfont_get_char(c->fnt, ch & 0xff);
+	char* char_data = bitfont_get_char(c->fnt, ch & 0xff), *font = char_data;
 	sdl_rgb_t *ptr = (sdl_rgb_t *) ((SDL_Surface*) c->surface)->pixels;
 	sdl_rgb_t *color;
 	int lineoffset;
@@ -272,7 +272,6 @@ void console_putchar(Console* self, int ch, int doupdate) {
 	for (y = 0, ry = self->cursor.y * c->fnt->dim.y, lineoffset=ry*pitch_div_4;
 	     y < c->fnt->dim.y;
 	     y++, ry++,lineoffset+=pitch_div_4) {
-		char *font = char_data + y * c->fnt->dim.x;
 		for (x = 0, rx = self->cursor.x * c->fnt->dim.x; x < c->fnt->dim.x; x++, rx++, font++) {
 			color = *font ? &c->color.fgcolor : &c->color.bgcolor;
 			ptr[lineoffset + rx] = *color;
