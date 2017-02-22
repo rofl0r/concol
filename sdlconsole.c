@@ -263,23 +263,17 @@ void console_putchar(Console* self, int ch, int doupdate) {
 	struct SDLConsole *c = &self->backend.sdl;
 	console_unblink(self);
 	console_lock();
-	char* char_data = bitfont_get_char(c->fnt, ch & 0xff), *font = char_data;
+	unsigned char* font = (void*)bitfont_get_char(c->fnt, ch & 0xff);
 	int pitch_div_4 = (((SDL_Surface*) c->surface)->pitch / 4);
-	sdl_rgb_t *ptr = (sdl_rgb_t *) ((SDL_Surface*) c->surface)->pixels, *out;
+	sdl_rgb_t *ptr = (sdl_rgb_t *) ((SDL_Surface*) c->surface)->pixels;
 	ptr += self->cursor.y * c->fnt->dim.y * pitch_div_4;
 	ptr += self->cursor.x * c->fnt->dim.x;
 	size_t advance = (pitch_div_4 - c->fnt->dim.x);
-	sdl_rgb_t *color;
-	int lineoffset;
-	int x, y, ry;
-	for (y = 0, ry = self->cursor.y * c->fnt->dim.y;
-	     y < c->fnt->dim.y;
-	     y++, ry++, ptr += advance) {
-		for (x = 0;
-		     x < c->fnt->dim.x;
-		     x++, font++, ptr++) {
-			color = *font ? &c->color.fgcolor : &c->color.bgcolor;
-			*ptr = *color;
+	sdl_rgb_t color[2] = {[0] = c->color.bgcolor, [1] = c->color.fgcolor};
+	int x, y;
+	for (y = 0; y < c->fnt->dim.y; y++, ptr += advance) {
+		for (x = 0; x < c->fnt->dim.x; x++, font++, ptr++) {
+			*ptr = color[*font];
 		}
 	}
 	if(doupdate) SDL_UpdateRect(c->surface, self->cursor.x * c->fnt->dim.x ,self->cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
