@@ -14,6 +14,11 @@
 
 #include "fonts/font.h"
 
+/* possible values for CONSOLE_BACKEND macro */
+#define NCURSES_CONSOLE 1
+#define TERMBOX_CONSOLE 2
+#define SDL_CONSOLE 3
+
 extern unsigned int console_chartab[CC_MAX];
 #define CCT(charname) (console_chartab[charname])
 
