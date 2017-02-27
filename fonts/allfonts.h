@@ -19,7 +19,7 @@
 #endif
 
 /* we don't need a font for terminal backends */
-#if (CONSOLE_FONT==NOFONT)
+#if (CONSOLE_FONT==NOFONT) || !defined(CONSOLE_FONT)
 #  if (CONSOLE_BACKEND==SDL_CONSOLE)
 #    error "SDL_CONSOLE backend requires use of a font"
 #  endif
@@ -60,8 +60,6 @@
 #  else
 #    error "unknown font"
 #  endif
-#else
-#  error "need to set CONSOLE_FONT"
 #endif
 
 
