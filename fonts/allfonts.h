@@ -3,6 +3,7 @@
 
 
 // allowed values for CONSOLE_FONT (do not use BITFONT_START)
+#define NOFONT 0
 #define TESTFONT 1
 #define BITFONT_START 2
 #define INT10FONT08 (BITFONT_START + 0)
@@ -13,7 +14,21 @@
  * or another one while compiling. this will get the right headers
  * and the c files they link to, to be added to the build */
 
-#if (CONSOLE_FONT==TESTFONT)
+#ifndef CONSOLE_BACKEND
+#  error "CONSOLE_BACKEND must be set"
+#endif
+
+/* we don't need a font for terminal backends */
+#if (CONSOLE_FONT==NOFONT)
+#  if (CONSOLE_BACKEND==SDL_CONSOLE)
+#    error "SDL_CONSOLE backend requires use of a font"
+#  endif
+#  ifdef NULL
+#    define FONT NULL
+#  else
+#    define FONT 0UL
+#  endif
+#elif (CONSOLE_FONT==TESTFONT)
 //RcB: SKIPON "CONSOLE_FONT=INT10FONT"
 #  include "testfont.h"
 //RcB: SKIPOFF "CONSOLE_FONT=INT10FONT"
