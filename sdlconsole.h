@@ -67,6 +67,7 @@ typedef struct {
 typedef struct SDLConsole {
 	void *surface;
 	sdl_rgb_tuple color;
+	sdl_rgb_tuple* cache;
 	point res;
 	font* fnt;
 	int paintmode:1;

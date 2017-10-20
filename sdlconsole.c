@@ -151,6 +151,11 @@ void console_unlock(void) {
 	SDL_mutex_unlock(screens_lock);
 }
 
+static void alloc_cache(SDLConsole *c) {
+	if(c->cache) free(c->cache);
+	c->cache=calloc(c->res.x*c->res.y, sizeof(sdl_rgb_tuple));
+}
+
 void console_resize(Console *self, int w, int h) {
 	SDLConsole *c = &self->backend.sdl;
 	console_lock();
@@ -166,6 +171,7 @@ void console_resize(Console *self, int w, int h) {
 		printf("Couldn't set screen mode to %d x %d : %s\n", w, h, SDL_GetError());
 		exit(1);
 	}
+	alloc_cache(c);
 	console_unlock();
 }
 
@@ -263,6 +269,10 @@ void console_putchar(Console* self, int ch, int doupdate) {
 	struct SDLConsole *c = &self->backend.sdl;
 	console_unblink(self);
 	console_lock();
+	sdl_rgb_tuple cache_test = c->color;
+	cache_test.bgcolor.colors.a = (unsigned char) ch;
+	if(!memcmp(&c->cache[self->cursor.y * self->dim.x + self->cursor.x], &cache_test, 8)) goto skip;
+	else c->cache[self->cursor.y * self->dim.x + self->cursor.x] = cache_test;
 	unsigned char* font = (void*)bitfont_get_char(c->fnt, ch & 0xff);
 	int pitch_div_4 = (((SDL_Surface*) c->surface)->pitch / 4);
 	sdl_rgb_t *ptr = (sdl_rgb_t *) ((SDL_Surface*) c->surface)->pixels;
@@ -277,6 +287,7 @@ void console_putchar(Console* self, int ch, int doupdate) {
 		}
 	}
 	if(doupdate) SDL_UpdateRect(c->surface, self->cursor.x * c->fnt->dim.x ,self->cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
+skip:
 	console_unlock();
 	if(self->automove) console_advance_cursor(self, 1);
 }
