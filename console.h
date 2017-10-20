@@ -11,6 +11,7 @@
 #include "sdlconsole.h"
 #include "tbconsole.h"
 #include "ncconsole.h"
+#include "nopconsole.h"
 
 #include "fonts/font.h"
 
@@ -18,6 +19,7 @@
 #define NCURSES_CONSOLE 1
 #define TERMBOX_CONSOLE 2
 #define SDL_CONSOLE 3
+#define NOP_CONSOLE 4
 
 extern unsigned int console_chartab[CC_MAX];
 #define CCT(charname) (console_chartab[charname])
@@ -28,6 +30,7 @@ enum ConsoleBackend {
 	cb_sdl = 0,
 	cb_ncurses,
 	cb_termbox,
+	cb_nop,
 };
 
 typedef struct Console {
@@ -41,6 +44,7 @@ typedef struct Console {
 		TbConsole tb;
 		SDLConsole sdl;
 		NcConsole nc;
+		NopConsole nop;
 	} backend;
 } Console;
 
