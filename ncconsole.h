@@ -82,6 +82,13 @@ typedef struct {
 	short bgcol;
 } Colorpair;
 
+enum nc_flags {
+	NC_HASCOLORS = 1 << 0,
+	NC_CANCHANGECOLORS = 1 << 1,
+	NC_HASMOUSE = 1 << 2,
+	NC_SUPPORTSCOLORREADER = 1 << 3,
+};
+
 typedef struct NcConsole {
 	unsigned lastattr;
 	rgb_t colors[CONSOLE_COLORPAIRCOUNT];

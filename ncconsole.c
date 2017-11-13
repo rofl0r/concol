@@ -42,12 +42,6 @@ static FILE* dbg = NULL;
 #define PDEBUG(fmt, args...) do {} while (0)
 #endif
 
-enum nc_flags {
-	NC_HASCOLORS = 1 << 0,
-	NC_CANCHANGECOLORS = 1 << 1,
-	NC_HASMOUSE = 1 << 2,
-};
-
 static inline int self_hasColors(struct NcConsole* self) {
 	return self->flags & NC_HASCOLORS;
 }
@@ -115,7 +109,7 @@ static void console_savecolors(struct NcConsole *self) {
 	short int fg, bg;
 	struct color_reader cr;
 	int use_cr;
-	use_cr = !color_reader_init(&cr);
+	use_cr = self->flags & NC_SUPPORTSCOLORREADER && !color_reader_init(&cr);
 	int maxc = MIN(self->maxcolors, CONSOLE_MAXSAVECOLORS);
 	for (i = MIN_COLOR; i < maxc; i++) {
 		if(use_cr) color_reader_get_color(&cr, i, &self->org_colors[i]);
@@ -449,10 +443,17 @@ void console_init_graphics(Console* con, point resolution, font* fnt) {
 	struct NcConsole *self = &con->backend.nc;
 
 	snprintf(org_term, sizeof org_term, "%s", getenv("TERM"));
-	if(!strcmp(org_term, "xterm"))
+
+	if(!strcmp(org_term, "xterm")) {
 		setenv("TERM", "xterm-256color", 1);
-	else if(!strcmp(org_term, "rxvt-unicode"))
+		self->flags |= NC_SUPPORTSCOLORREADER;
+	} else if(!strcmp(org_term, "rxvt-unicode")) {
 		setenv("TERM", "rxvt-unicode-256color", 1);
+		self->flags |= NC_SUPPORTSCOLORREADER;
+	} else if(!strcmp(org_term, "xterm-256color")) {
+		self->flags |= NC_SUPPORTSCOLORREADER;
+	}
+
 
 	self->active.fgcol = -1;
 	self->active.fgcol = -1;
