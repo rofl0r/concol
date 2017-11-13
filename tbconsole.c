@@ -12,17 +12,6 @@
 
 #define ARRAY_SIZE(X) (sizeof(X) / sizeof((X)[0]))
 
-static const rgb_t tbcolors[] = {
-	[TB_BLACK] = RGB3(BLACK),
-	[TB_RED] = RGB3(RED),
-	[TB_GREEN] = RGB3(GREEN),
-	[TB_YELLOW] = RGB3(YELLOW),
-	[TB_BLUE] = RGB3(BLUE),
-	[TB_MAGENTA] = RGB3(MAGENTA),
-	[TB_CYAN] = RGB3(CYAN),
-	[TB_WHITE] = RGB3(WHITE),
-};
-
 /* initialize a Console struct */
 void console_init(struct Console* self) {
 	memset(self, 0, sizeof(struct Console));
@@ -35,34 +24,7 @@ void console_cleanup(struct Console* self) {
 	tb_shutdown();
 }
 
-#define ABS(X) ((X) < 0 ? (X) * -1 : (X))
-#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
-static int getNearestColor(rgb_t col) {
-	unsigned dist[ARRAY_SIZE(tbcolors)];
-	unsigned i;
-	unsigned nearest = 0xFFFFFFFF;
-	unsigned brightestcol = 0;
-	if(col.r == col.g && col.r == col.b) {
-		if(col.r < 128) return TB_BLACK;
-		else return TB_WHITE;
-	}
-	brightestcol = MAX(brightestcol, col.r);
-	brightestcol = MAX(brightestcol, col.g);
-	brightestcol = MAX(brightestcol, col.b);
-	brightestcol = MAX(brightestcol, 1);
-	int scale = (255*256) / brightestcol;
-	for(i = 0; i < ARRAY_SIZE(tbcolors); i++) {
-		dist[i] = ABS(tbcolors[i].r * 256 - col.r * scale) + 
-			  ABS(tbcolors[i].g * 256 - col.g * scale) + 
-			  ABS(tbcolors[i].b * 256 - col.b * scale);
-		if(dist[i] == 0) return i;
-		if(dist[i] < nearest) nearest = dist[i];
-	}
-	for(i = 0; i < ARRAY_SIZE(tbcolors); i++) {
-		if(dist[i] == nearest) return i;
-	}
-	return 0;
-}
+#include "nearestcolor.c"
 
 int console_setcolor(struct Console* self, int is_fg, rgb_t mycolor) {
 	struct TbConsole *c = &self->backend.tb;

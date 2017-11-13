@@ -159,9 +159,19 @@ static int console_setcursescolor(struct NcConsole* self, int colornumber, rgb_t
 	return init_color(colornumber+MIN_COLOR, nr, ng, nb) != ERR;
 }
 
+#include "nearestcolor.c"
+
 int console_setcolor(struct Console* con, int is_fg, rgb_t mycolor) {
 	struct NcConsole *self = &con->backend.nc;
 	int i;
+
+	if( ! (self->flags & NC_CANCHANGECOLORS) ) {
+		int nearest = getNearestColor(mycolor);
+		if(is_fg) self->active.fgcol = nearest;
+		else self->active.bgcol = nearest;
+		return 1;
+	}
+
 	short* which = is_fg ? &self->active.fgcol : &self->active.bgcol;
 
 	PDEBUG("setcolor: (%d, %d, %d), fg: %d\n", mycolor.r, mycolor.g, mycolor.b, is_fg);
