@@ -485,7 +485,9 @@ void console_init_graphics(Console* con, point resolution, font* fnt) {
 	dbg = fopen("console.log", "w");
 #endif
 
-	if (has_colors()) self->flags |= NC_HASCOLORS;
+	if(!getenv("CONCOL_NO_COLORS")) {
+		if (has_colors()) self->flags |= NC_HASCOLORS;
+	}
 	if (self_hasColors(self) && can_change_color())
 		self->flags |= NC_CANCHANGECOLORS;
 
