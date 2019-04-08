@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <string.h>
 
-//RcB: DEP "tbconsole_chartab.c"
+#pragma RcB2 DEP "tbconsole_chartab.c"
 
 #define ARRAY_SIZE(X) (sizeof(X) / sizeof((X)[0]))
 

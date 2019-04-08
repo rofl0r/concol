@@ -5,6 +5,6 @@
 
 extern font testfont;
 
-//RcB: DEP "testfont.c"
+#pragma RcB2 DEP "testfont.c"
 
 #endif

@@ -20,7 +20,7 @@
 
 #include "../fonts/allfonts.h"
 //#include "strlib.h"
-//RcB: LINK "-llept"
+#pragma RcB2 LINK "-llept"
 
 #ifndef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))

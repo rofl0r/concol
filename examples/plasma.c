@@ -4,7 +4,7 @@ CFLAGS="-Wall -DCONSOLE_BACKEND=NCURSES_CONSOLE" rcb --new --force --debug plasm
 CFLAGS="-Wall -DCONSOLE_BACKEND=TERMBOX_CONSOLE -L ../../termbox" rcb --new --force --debug plasma.c
 */
 
-//RcB: LINK "-lm"
+#pragma RcB2 LINK "-lm"
 #include "../console.h"
 #include "../console_keys.h"
 #define CONSOLE_FONT TESTFONT

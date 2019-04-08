@@ -1,6 +1,7 @@
 #ifndef SDLCONSOLE_H
 #define SDLCONSOLE_H
 
+
 #include <stdint.h>
 #include "endianness.h"
 
@@ -9,15 +10,6 @@
 #include "fonts/font.h"
 #include "console.h"
 #include "console_events.h"
-
-//RcB: SKIPON "CONSOLE_BACKEND=TERMBOX_CONSOLE"
-//RcB: SKIPON "CONSOLE_BACKEND=NCURSES_CONSOLE"
-//RcB: SKIPON "CONSOLE_BACKEND=NOP_CONSOLE"
-//RcB: LINK "-lSDL"
-//RcB: DEP "sdlconsole.c"
-//RcB: SKIPOFF "CONSOLE_BACKEND=TERMBOX_CONSOLE"
-//RcB: SKIPOFF "CONSOLE_BACKEND=NCURSES_CONSOLE"
-//RcB: SKIPOFF "CONSOLE_BACKEND=NOP_CONSOLE"
 
 
 typedef union {
@@ -74,5 +66,10 @@ typedef struct SDLConsole {
 	int cursorblink:1;
 	int fullscreen:1;
 } SDLConsole;
+
+#if CONSOLE_BACKEND == SDL_CONSOLE
+#pragma RcB2 LINK "-lSDL"
+#pragma RcB2 DEP "sdlconsole.c"
+#endif
 
 #endif

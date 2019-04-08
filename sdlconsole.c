@@ -6,16 +6,14 @@
 #include "rect.h"
 #include <stdarg.h>
 
-//RcB: SKIPON CONSOLE_FONT
 #ifndef CONSOLE_FONT
 #include "fonts/testfont.h"
 #endif
-//RcB: SKIPOFF CONSOLE_FONT
 
 #define SDL_mutex_lock(X) SDL_mutexP(X)
 #define SDL_mutex_unlock(X) SDL_mutexV(X)
 
-//RcB: DEP "sdlconsole_chartab.c"
+#pragma RcB2 DEP "sdlconsole_chartab.c"
 
 void console_resize(Console *c, int w, int h);
 

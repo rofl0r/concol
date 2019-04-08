@@ -59,7 +59,7 @@ static int console_setcolorpair(struct NcConsole* self, int pair, int fgcol, int
 static int console_usecolorpair(struct NcConsole* self, int pair);
 
 #include <pthread.h>
-//RcB: LINK "-lpthread"
+#pragma RcB2 LINK "-lpthread"
 
 static pthread_mutex_t resize_mutex;
 

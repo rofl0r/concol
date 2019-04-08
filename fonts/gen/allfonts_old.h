@@ -14,15 +14,11 @@
  * and the c files they link to, to be added to the build */
 
 #if (CONSOLE_FONT==TESTFONT)
-//RcB: SKIPON "CONSOLE_FONT=INT10FONT"
 #  include "testfont_old.h"
-//RcB: SKIPOFF "CONSOLE_FONT=INT10FONT"
 #  define FONT (&testfont)
 #elif (CONSOLE_FONT >= BITFONT_START)
-//RcB: SKIPON "CONSOLE_FONT=TESTFONT"
 #  include "bitfont.h"
 #  include "dosfonts.h"
-//RcB: SKIPOFF "CONSOLE_FONT=TESTFONT"
 #  if (CONSOLE_FONT==INT10FONT08)
 #    define FONT (bitfont_to_font(&int10_font_08))
 #  elif (CONSOLE_FONT==INT10FONT14)

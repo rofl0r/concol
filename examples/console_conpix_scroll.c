@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 #include <leptonica/allheaders.h>
-//RcB: LINK "-llept"
+#pragma RcB2 LINK "-llept"
 
 #include "../console.h"
 #include "../console_keys.h"

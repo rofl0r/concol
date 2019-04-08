@@ -64,15 +64,10 @@
 
 #include <stdint.h>
 
-//RcB: SKIPON "CONSOLE_BACKEND=SDL_CONSOLE"
-//RcB: SKIPON "CONSOLE_BACKEND=TERMBOX_CONSOLE"
-//RcB: SKIPON "CONSOLE_BACKEND=NOP_CONSOLE"
-//RcB: LINK "-lncurses"
-//RcB: DEP "ncconsole.c"
-//RcB: SKIPOFF "CONSOLE_BACKEND=SDL_CONSOLE"
-//RcB: SKIPOFF "CONSOLE_BACKEND=TERMBOX_CONSOLE"
-//RcB: SKIPOFF "CONSOLE_BACKEND=NOP_CONSOLE"
-
+#if CONSOLE_BACKEND == NCURSES_CONSOLE
+#pragma RcB2 LINK "-lncurses"
+#pragma RcB2 DEP "ncconsole.c"
+#endif
 
 #include "rgb.h"
 #include "console.h"

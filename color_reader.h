@@ -18,5 +18,6 @@ int color_reader_init(struct color_reader *cr);
 int color_reader_get_color(struct color_reader *cr, int colnr, rgb_t*out);
 int color_reader_close(struct color_reader *cr);
 
-//RcB: DEP "color_reader.c"
+#pragma RcB2 DEP "color_reader.c"
+
 #endif

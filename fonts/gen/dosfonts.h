@@ -7,7 +7,7 @@ extern bitfont int10_font_08;
 extern bitfont int10_font_14;
 extern bitfont int10_font_16;
 
-//RcB: DEP "dosfonts.c"
+#pragma RcB2 DEP "dosfonts.c"
 
 #endif
 

@@ -1,7 +1,13 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-//RcB: DEP "console.c"
+/* possible values for CONSOLE_BACKEND macro */
+#define NCURSES_CONSOLE 1
+#define TERMBOX_CONSOLE 2
+#define SDL_CONSOLE 3
+#define NOP_CONSOLE 4
+
+#pragma RcB2 DEP "console.c"
 
 #include "point.h"
 #include "rect.h"
@@ -14,12 +20,6 @@
 #include "nopconsole.h"
 
 #include "fonts/font.h"
-
-/* possible values for CONSOLE_BACKEND macro */
-#define NCURSES_CONSOLE 1
-#define TERMBOX_CONSOLE 2
-#define SDL_CONSOLE 3
-#define NOP_CONSOLE 4
 
 extern unsigned int console_chartab[CC_MAX];
 #define CCT(charname) (console_chartab[charname])

@@ -5,6 +5,6 @@
 
 extern font int10font14;
 
-//RcB: DEP "int10font14.c"
+#pragma RcB2 DEP "int10font14.c"
 
 #endif
