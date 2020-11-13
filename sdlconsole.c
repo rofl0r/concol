@@ -267,6 +267,8 @@ void console_putchar(Console* self, int ch, int doupdate) {
 	struct SDLConsole *c = &self->backend.sdl;
 	console_unblink(self);
 	console_lock();
+	if(self->cursor.y >= self->dim.y || self->cursor.x >= self->dim.x)
+		goto skip;
 	sdl_rgb_tuple cache_test = c->color;
 	cache_test.bgcolor.colors.a = (unsigned char) ch;
 	if(!memcmp(&c->cache[self->cursor.y * self->dim.x + self->cursor.x], &cache_test, 8)) goto skip;
