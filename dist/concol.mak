@@ -6,7 +6,7 @@
 # i.e. something like OBJS=$(SRCS:.c=.o)
 # you need to set the following variables in the Makefile:
 # CONCOL_BASEDIR : directory containing the concol sources
-# BACKEND : must be set to one of SDL or NCURSES
+# BACKEND : must be set to one of SDL, SDL2 or NCURSES
 # you probably want to make BACKEND variable user-choosable via a configure
 # script or something, the results of which you include from your Makefile
 # as well.
@@ -29,7 +29,7 @@ ifeq ($(BACKEND),NCURSES)
   LIBS += $(NCURSES_LIBS)
   CFLAGS+=-DCONSOLE_BACKEND=NCURSES_CONSOLE
   CFLAGS+=-DCONSOLE_FONT=NOFONT
-else ifeq ($(BACKEND),SDL)
+else ifeq ($(subst 2,,$(BACKEND)),SDL)
   CONSOLE_FONT ?= INT10FONT14
   ifeq ($(CONSOLE_FONT),INT10FONT14)
     SRCS+=$(CONCOL_BASEDIR)/fonts/int10font14.c
@@ -44,10 +44,10 @@ else ifeq ($(BACKEND),SDL)
   CFLAGS+=-DCONSOLE_FONT=$(CONSOLE_FONT)
   CFLAGS+=-DCONSOLE_BACKEND=SDL_CONSOLE
   ifeq ($(SDL_LIBS),)
-    SDL_LIBS = -lSDL
+    SDL_LIBS = -l$(BACKEND)
   endif
   LIBS += $(SDL_LIBS)
 else
-  $(error need to set BACKEND to one of SDL or NCURSES)
+  $(error need to set BACKEND to one of SDL, SDL2 or NCURSES)
 endif
 

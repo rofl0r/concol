@@ -58,6 +58,9 @@ typedef struct {
 
 typedef struct SDLConsole {
 	void *surface;
+	void *window;
+	void *renderer;
+	void *texture;
 	sdl_rgb_tuple color;
 	sdl_rgb_tuple* cache;
 	point res;
@@ -68,7 +71,11 @@ typedef struct SDLConsole {
 } SDLConsole;
 
 #if CONSOLE_BACKEND == SDL_CONSOLE
+#if USE_SDL2 +0 == 0
 #pragma RcB2 LINK "-lSDL"
+#else
+#pragma RcB2 LINK "-lSDL2"
+#endif
 #pragma RcB2 DEP "sdlconsole.c"
 #endif
 

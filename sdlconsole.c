@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#if USE_SDL2 +0 == 0
 #include <SDL/SDL.h>
+#else
+#include <SDL2/SDL.h>
+#endif
 #include "console.h"
 #include "rect.h"
 #include <stdarg.h>
@@ -24,9 +28,27 @@ void console_init(struct Console *self) {
 	self->backendtype = cb_sdl;
 }
 void console_settitle(Console *self, const char *title) {
+#if SDL_MAJOR_VERSION == 2
+	struct SDLConsole *c = &self->backend.sdl;
+	SDL_SetWindowTitle(c->window, title);
+#else
 	(void) self;
 	SDL_WM_SetCaption(title, NULL);
+#endif
 }
+
+#if SDL_MAJOR_VERSION == 1
+#define update_rect(C, X, Y, W, H) SDL_UpdateRect((C)->surface, X, Y, W, H)
+#else
+static void update_rect(struct SDLConsole *c, int x, int y, int w, int h) {
+	SDL_Surface *s = c->surface;
+	const SDL_Rect* area = w ? &(SDL_Rect){.x = x, .y = y, .w = w, .h = h} : 0;
+	SDL_UpdateTexture(c->texture, area, s->pixels, s->pitch);
+	SDL_RenderClear(c->renderer);
+	SDL_RenderCopy(c->renderer, c->texture, NULL, NULL);
+	SDL_RenderPresent(c->renderer);
+}
+#endif
 
 void console_init_graphics(Console* self, point resolution, font* fnt) {
 	struct SDLConsole *c = &self->backend.sdl;
@@ -47,10 +69,22 @@ void console_init_graphics(Console* self, point resolution, font* fnt) {
 	screens_lock = SDL_CreateMutex();
 
 	c->fnt = fnt;
+#if SDL_MAJOR_VERSION == 2
+	c->window = SDL_CreateWindow("sdl-console",
+                             SDL_WINDOWPOS_UNDEFINED,
+                             SDL_WINDOWPOS_UNDEFINED,
+                             resolution.x, resolution.y,
+                             0 | SDL_WINDOW_RESIZABLE /* | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL*/);
+	c->renderer = SDL_CreateRenderer(c->window, -1, 0);
+	SDL_EnableScreenSaver();
+	SDL_SetHint(SDL_HINT_TIMER_RESOLUTION, "5");
+#endif
 	console_resize(self, resolution.x, resolution.y);
 	//c->fnt = bitfont_to_font(&int10_font_16);
+#if SDL_MAJOR_VERSION == 1
 	console_settitle(self, "sdl-console");
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+#endif
 }
 
 void console_cleanup(Console* self) {
@@ -91,11 +125,33 @@ void console_sleep(struct Console* self, int ms) {
 
 #define INCLUDED_FROM_SDLCONSOLE
 #include "sdlconsole_keyboard.c"
+
+static void handle_event_action(Console *c, SDL_Event *event, int action) {
+	switch(action) {
+		case ea_resized:
+#if SDL_MAJOR_VERSION == 1
+                        console_resize(c, event->resize.w, event->resize.h);
+#else
+			console_resize(c, event->window.data1, event->window.data2);
+#endif
+			break;
+		case ea_redraw:
+			console_refresh(c);
+			break;
+		case ea_toggle_fullscreen:
+			console_toggle_fullscreen(c);
+			break;
+	}
+}
+
 int console_getkey_nb(Console* c) {
 	SDL_Event event;
 	/* Loop through waiting messages and process them */
 	while (SDL_PollEvent(&event)) {
-		return sdlconsole_translate_event(c, &event);
+		int k, action;
+		k = sdlconsole_translate_event(c, &event, &action);
+		handle_event_action(c, &event, action);
+		return k;
 	}
 	return CK_UNDEF;
 }
@@ -103,13 +159,16 @@ int console_getkey_nb(Console* c) {
 int console_getkey(Console* c) {
 	SDL_Event event;
 	/* Loop through waiting messages and process them */
-	int ret;
+	int ret, action;
 	while(1) {
-		while (SDL_PollEvent(&event)) {
-			ret = sdlconsole_translate_event(c, &event);
+		if (SDL_WaitEvent(&event)) {
+			ret = sdlconsole_translate_event(c, &event, &action);
+			handle_event_action(c, &event, action);
 			if(ret != CK_UNDEF) return ret;
+		} else { // error happened, prevent 100% cpu loop
+			console_sleep(c, 10);
+			break;
 		}
-		console_sleep(c, 1);
 	}
 	return CK_UNDEF;
 }
@@ -163,8 +222,21 @@ void console_resize(Console *self, int w, int h) {
 	self->dim.y = h / c->fnt->dim.y;
 	if(c->surface)
 		SDL_FreeSurface(c->surface);
+#if SDL_MAJOR_VERSION == 2
+	c->surface = SDL_CreateRGBSurface(0, w, h, 32,
+                                        0x00FF0000,
+                                        0x0000FF00,
+                                        0x000000FF,
+                                        0xFF000000);
 
+	if(c->texture) SDL_DestroyTexture(c->texture);
+	c->texture = SDL_CreateTexture(c->renderer,
+                               SDL_PIXELFORMAT_ARGB8888,
+                               SDL_TEXTUREACCESS_STREAMING,
+                               w, h);
+#else
 	c->surface = SDL_SetVideoMode(w, h, 32, SDL_RESIZABLE | SDL_HWPALETTE);
+#endif
 	if(!c->surface) {
 		printf("Couldn't set screen mode to %d x %d : %s\n", w, h, SDL_GetError());
 		exit(1);
@@ -176,7 +248,11 @@ void console_resize(Console *self, int w, int h) {
 void console_toggle_fullscreen(Console* self) {
 	SDLConsole *c = &self->backend.sdl;
 	console_lock();
+#if SDL_MAJOR_VERSION == 2
+	SDL_SetWindowFullscreen(c->window, c->fullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
+#elif SDL_MAJOR_VERSION == 1
 	SDL_WM_ToggleFullScreen(c->surface);
+#endif
 	c->fullscreen = ~ c->fullscreen;
 	console_unlock();
 }
@@ -222,7 +298,7 @@ int console_setcolor(struct Console* self, int is_fg, rgb_t color) {
 void console_refresh(Console* self) {
 	struct SDLConsole *c = &self->backend.sdl;
 	console_lock();
-	SDL_UpdateRect(c->surface, 0, 0, 0, 0);
+	update_rect(c, 0, 0, 0, 0);
 	console_unlock();
 }
 
@@ -238,7 +314,7 @@ void console_blink_cursor(Console* self) {
 				ptr[lineoffset + rx].val = ~ptr[lineoffset + rx].val;
 			}
 		}
-		SDL_UpdateRect(c->surface, self->cursor.x * c->fnt->dim.x ,self->cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
+		update_rect(c, self->cursor.x * c->fnt->dim.x ,self->cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
 		self->isblinking = ~self->isblinking;
 	}
 	console_unlock();
@@ -286,7 +362,7 @@ void console_putchar(Console* self, int ch, int doupdate) {
 			*ptr = color[*font];
 		}
 	}
-	if(doupdate) SDL_UpdateRect(c->surface, self->cursor.x * c->fnt->dim.x ,self->cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
+	if(doupdate) update_rect(c, self->cursor.x * c->fnt->dim.x ,self->cursor.y * c->fnt->dim.y, c->fnt->dim.x, c->fnt->dim.y);
 skip:
 	console_unlock();
 	if(self->automove) console_advance_cursor(self, 1);

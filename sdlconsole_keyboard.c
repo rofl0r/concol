@@ -1,6 +1,27 @@
 #include "sdlconsole.h"
 #include "console_keys.h"
+#if USE_SDL2 +0 == 0
 #include <SDL/SDL.h>
+#else
+#include <SDL2/SDL.h>
+#endif
+
+#if SDL_MAJOR_VERSION == 2
+#define SDL_keysym SDL_Keysym
+#define SDLK_KP0 SDLK_KP_0
+#define SDLK_KP1 SDLK_KP_1
+#define SDLK_KP2 SDLK_KP_2
+#define SDLK_KP3 SDLK_KP_3
+#define SDLK_KP4 SDLK_KP_4
+#define SDLK_KP5 SDLK_KP_5
+#define SDLK_KP6 SDLK_KP_6
+#define SDLK_KP7 SDLK_KP_7
+#define SDLK_KP8 SDLK_KP_8
+#define SDLK_KP9 SDLK_KP_9
+#define KMOD_LMETA KMOD_LGUI
+#define KMOD_RMETA KMOD_RGUI
+#endif
+
 
 #ifdef IN_KDEVELOP_PARSER
 #define INCLUDED_FROM_SDLCONSOLE
@@ -23,12 +44,14 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 	else
 		shift = 0;
 
-	printf("shift: %d, mod %d, sym %d, name %s\n", shift, key->mod, key->sym, SDL_GetKeyName(key->sym));
+//	printf("shift: %d, mod %d, sym %d, name %s\n", shift, key->mod, key->sym, SDL_GetKeyName(key->sym));
 	switch(shift) {
 		// alt
 		case -1:
+#if 0
 			if(key->sym == SDLK_RETURN)
 				console_toggle_fullscreen(self);
+#endif
 			break;
 		//ctrl
 		case -2:
@@ -73,6 +96,7 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 		case -3:
 			printf("alt gr pressed!\n");
 			switch(key->sym) {
+#if SDL_MAJOR_VERSION == 1
 				case SDLK_q:
 					return '@';
 				case SDLK_7:
@@ -90,7 +114,7 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 					return '~';
 				case SDLK_LESS:
 					return '|';
-
+#endif
 				default:
 					return key->sym;
 			}
@@ -149,7 +173,7 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 					return 'Y';
 				case SDLK_z:
 					return 'Z';
-
+#if SDL_MAJOR_VERSION == 1
 				case SDLK_1:
 					return '!';
 				case SDLK_2:
@@ -188,7 +212,7 @@ static int sdlkey_to_ascii(Console* self, struct SDL_keysym* key) {
 					return ';';
 				case SDLK_MINUS:
 					return '_';
-
+#endif
 				default:
 					return key->sym;
 			}
@@ -276,13 +300,27 @@ static void print_all_fonts(Console* c) {
 	console_draw(c);
 }
 
+enum event_actions {
+	ea_none = 0,
+	ea_toggle_fullscreen,
+	ea_resized,
+	ea_redraw,
+};
+
+
 #if 0
 static
 #endif
-int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
+int sdlconsole_translate_event(Console* self, SDL_Event* ev, int *action) {
 	SDLConsole* c = &self->backend.sdl;
 	int keymods;
 	SDL_Event event = *ev;
+	*action = 0;
+#ifdef CONSOLE_DEBUG
+	if(event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
+		printf("%s: mod %d, sym %d, name %s\n", event.type == SDL_KEYDOWN ? "DOWN" : "UP",
+			event.key.keysym.mod, event.key.keysym.sym, SDL_GetKeyName(event.key.keysym.sym));
+#endif
 	switch (event.type) {
 		case SDL_QUIT:
 			return CK_QUIT;
@@ -333,7 +371,7 @@ int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 				case SDLK_ESCAPE:
 					return keymods | CK_ESCAPE;
 				case SDLK_RETURN:
-					if(keymods & CK_MOD_ALT) console_toggle_fullscreen(self);
+					if(keymods & CK_MOD_ALT) *action = ea_toggle_fullscreen;
 					return keymods | CK_RETURN;
 				case SDLK_BACKSPACE:
 					return keymods | CK_BACKSPACE;
@@ -361,6 +399,11 @@ int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 					return keymods | sdlkey_to_ascii(self, &event.key.keysym);
 			}
 			break;
+#if SDL_MAJOR_VERSION == 2
+		case SDL_MOUSEWHEEL:
+			self->mouse.mouse_ev = event.wheel.y > 0  ? ME_WHEEL_UP : ME_WHEEL_DOWN;
+			return CK_MOUSE_EVENT;
+#endif
 		case SDL_MOUSEBUTTONUP:
 		case SDL_MOUSEBUTTONDOWN:
 			self->mouse.mouse_ev = (event.type == SDL_MOUSEBUTTONDOWN) ? ME_BUTTON_DOWN : ME_BUTTON_UP;
@@ -375,10 +418,12 @@ int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 				case SDL_BUTTON_LEFT:
 					self->mouse.button = MB_LEFT;
 					break;
+#if SDL_MAJOR_VERSION == 1
 				case SDL_BUTTON_WHEELUP:
 				case SDL_BUTTON_WHEELDOWN:
 					self->mouse.mouse_ev = (event.button.button == SDL_BUTTON_WHEELUP) ? ME_WHEEL_UP : ME_WHEEL_DOWN;
 					break;
+#endif
 				default:
 					self->mouse.button = MB_NONE;
 					break;
@@ -396,9 +441,21 @@ int sdlconsole_translate_event(Console* self, SDL_Event* ev) {
 			self->mouse.coords.y = event.motion.y / c->fnt->dim.y;
 			self->mouse.mouse_ev = ME_MOVE;
 			return CK_MOUSE_EVENT;
+#if SDL_MAJOR_VERSION == 1
 		case SDL_VIDEORESIZE:
-			console_resize(self, event.resize.w, event.resize.h);
+			*action = ea_resized;
 			return CK_RESIZE_EVENT;
+#elif SDL_MAJOR_VERSION == 2
+		case SDL_WINDOWEVENT:
+			if(event.window.event == SDL_WINDOWEVENT_RESIZED) {
+				*action = ea_resized;
+				return CK_RESIZE_EVENT;
+			} else if (event.window.event == SDL_WINDOWEVENT_EXPOSED) {
+				*action = ea_redraw;
+				return CK_UNDEF;
+			}
+			break;
+#endif
 		default:
 			break;
 	}

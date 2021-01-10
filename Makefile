@@ -1,16 +1,19 @@
-#need to set BACKEND to either termbox, ncurses, or sdl
+#need to set BACKEND to either TERMBOX, NCURSES, SDL, or SDL2
+#e.g. $ make BACKEND=SDL2 -j4
 
 LIBBASENAME=concol256
 LIBNAME=lib$(LIBBASENAME)
 
 LINKLIBS_TERMBOX=-ltermbox
 LINKLIBS_SDL=-lSDL
+LINKLIBS_SDL2=-lSDL2
 LINKLIBS_NCURSES=-lncurses -lpthread
 
 CFLAGS_OWN=-Wall -Wextra -static -std=c99
 CFLAGS_DBG=-g -O0
 CFLAGS_OPT=-Os -s
 CFLAGS_OPT_AGGRESSIVE=-O3 -s -flto -fwhole-program
+CPPFLAGS_BE=-DCONSOLE_BACKEND=$(subst 2,,$(BACKEND))_CONSOLE
 
 DYNEXT=.so
 STAEXT=.a
@@ -32,27 +35,36 @@ DYNLIB=$(OUTLIB)$(DYNEXT)
 STALIB=$(OUTLIB)$(STAEXT)
 MAINLIB=$(LIBNAME)$(DYNEXT)
 
-ifeq ($(BACKEND),termbox)
-	BACKEND_SRCS=tbconsole.c tbconsole_chartab.c
-	LINKLIBS=$(LINKLIBS_TERMBOX)
-else 
-	ifeq ($(BACKEND),ncurses)
-		BACKEND_SRCS=ncconsole.c color_reader.c
-		LINKLIBS=$(LINKLIBS_NCURSES)
-	else
-		ifeq ($(BACKEND),sdl)
-			BACKEND_SRCS=sdlconsole.c sdlconsole_chartab.c
-			LINKLIBS=$(LINKLIBS_SDL)
-		endif
-	endif
+ifeq ($(BACKEND),)
+ $(error need to set BACKEND!)
+endif
+ifeq ($(BACKEND),TERMBOX)
+ BACKEND_SRCS=tbconsole.c tbconsole_chartab.c
+ LINKLIBS=$(LINKLIBS_TERMBOX)
+else
+ ifeq ($(BACKEND),NCURSES)
+  BACKEND_SRCS=ncconsole.c color_reader.c
+  LINKLIBS=$(LINKLIBS_NCURSES)
+ else
+  ifeq ($(subst 2,,$(BACKEND)),SDL)
+   BACKEND_SRCS=sdlconsole.c sdlconsole_chartab.c
+   FONTSRCS=fonts/testfont.c fonts/int10font08.c fonts/int10font14.c fonts/int10font16.c
+  endif
+  ifeq ($(BACKEND),SDL)
+   LINKLIBS=$(LINKLIBS_SDL)
+  endif
+  ifeq ($(BACKEND),SDL2)
+   SDL2ADD=-DUSE_SDL2=1
+   LINKLIBS=$(LINKLIBS_SDL2)
+  endif
+ endif
 endif
 
 #ifndef $(LINKLIBS)
 #	$(error "need to set BACKEND to either termbox, ncurses, or sdl")
 #endif
 
-
-SRCS=console.c fonts/testfont.c fonts/int10font08.c fonts/int10font14.c fonts/int10font16.c $(BACKEND_SRCS)
+SRCS=console.c $(BACKEND_SRCS) $(FONTSRCS)
 OBJS=$(SRCS:.c=.o)
 
 
@@ -85,7 +97,7 @@ $(MAINLIB): $(DYNLIB)
 	ln -sf $(DYNLIB) $(MAINLIB)
 
 %.o: %.c
-	$(CC) -fPIC $(CPPFLAGS) $(CFLAGS) $(INC) -c -o $@ $<
+	$(CC) -fPIC $(CPPFLAGS) $(CFLAGS) $(INC) $(CPPFLAGS_BE) $(SDL2ADD) -c -o $@ $<
 
 test: $(TESTO)
 	$(CC) $(CFLAGS) -o $(TEST) $(TESTO) -L. -l$(LIBBASENAME)

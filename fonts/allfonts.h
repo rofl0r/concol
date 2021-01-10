@@ -21,12 +21,23 @@
 /* we don't need a font for terminal backends */
 #if (CONSOLE_FONT==NOFONT) || !defined(CONSOLE_FONT)
 #  if (CONSOLE_BACKEND==SDL_CONSOLE)
-#    error "SDL_CONSOLE backend requires use of a font"
-#  endif
-#  ifdef NULL
-#    define FONT NULL
+#    if 0
+#      error "SDL_CONSOLE backend requires use of a font"
+#    else
+#       include "testfont.h"
+#       include "int10font08.h"
+#       include "int10font14.h"
+#       include "int10font16.h"
+#       ifndef FONT
+#         define FONT (&int10font08)
+#       endif
+#    endif
 #  else
-#    define FONT 0UL
+#    ifdef NULL
+#      define FONT NULL
+#    else
+#      define FONT 0UL
+#    endif
 #  endif
 #elif (CONSOLE_FONT==TESTFONT)
 #  include "testfont.h"
