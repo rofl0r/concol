@@ -22,7 +22,7 @@
 
 */
 
-enum {
+enum console_chars {
 	cc_block = 0, /* solid block, filling entire cell */
 	cc_board,
 	cc_btee,
@@ -98,6 +98,6 @@ enum {
 	cc_vline_bold,
 	cc_vline_d,
 	CC_MAX
-} console_chars;
+};
 
 #endif
