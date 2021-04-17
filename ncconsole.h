@@ -64,13 +64,14 @@
 
 #include <stdint.h>
 
+#include "console_sel.h"
+
 #if CONSOLE_BACKEND == NCURSES_CONSOLE
 #pragma RcB2 LINK "-lncurses"
 #pragma RcB2 DEP "ncconsole.c"
 #endif
 
 #include "rgb.h"
-#include "console.h"
 
 #define CONSOLE_COLORPAIRCOUNT 256
 #define CONSOLE_MAXSAVECOLORS 16

@@ -1,11 +1,7 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-/* possible values for CONSOLE_BACKEND macro */
-#define NCURSES_CONSOLE 1
-#define TERMBOX_CONSOLE 2
-#define SDL_CONSOLE 3
-#define NOP_CONSOLE 4
+#include "console_sel.h"
 
 #pragma RcB2 DEP "console.c"
 

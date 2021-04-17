@@ -8,7 +8,7 @@
 #include "point.h"
 #include "rect.h"
 #include "fonts/font.h"
-#include "console.h"
+#include "console_sel.h"
 #include "console_events.h"
 
 
