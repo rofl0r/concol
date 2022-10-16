@@ -7,8 +7,9 @@ LIBNAME=lib$(LIBBASENAME)
 LINKLIBS_TERMBOX=-ltermbox
 LINKLIBS_SDL=-lSDL
 LINKLIBS_SDL2=-lSDL2
-LINKLIBS_NCURSES := $(shell pkg-config --libs ncurses) -lpthread
-LINKLIBS_LEPT := $(shell pkg-config --libs lept)
+PKG_CONFIG = pkg-config
+LINKLIBS_NCURSES := $(shell $(PKG_CONFIG) --libs ncurses) -lpthread
+LINKLIBS_LEPT := $(shell $(PKG_CONFIG) --libs lept)
 
 CFLAGS_OWN=-Wall -Wextra -static -std=c99
 CFLAGS_DBG=-g -O0
