@@ -37,6 +37,10 @@ Compilation
 
 or
 
+    make BACKEND=SDL2
+
+or
+
     make BACKEND=NCURSES
 
 or
