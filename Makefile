@@ -29,6 +29,7 @@ CONPIXO=$(CONPIX).o
 CONPIXS=examples/console_conpix_scroll
 CONPIXSO=$(CONPIXS).o
 
+EXAMPLES=$(TEST) $(CONPIX) $(CONPIXS)
 
 -include config.mak
 
@@ -86,6 +87,7 @@ clean:
 	rm -f $(DYNLIB)
 	rm -f $(STALIB)
 	rm -f $(OBJS)
+	rm -f $(EXAMPLES)
 
 $(STALIB): $(OBJS)
 	ar rc $@ $(OBJS)
@@ -101,16 +103,16 @@ $(MAINLIB): $(DYNLIB)
 %.o: %.c
 	$(CC) -fPIC $(CPPFLAGS) $(CFLAGS) $(INC) $(CPPFLAGS_BE) $(SDL2ADD) -c -o $@ $<
 
-test: $(TESTO)
-	$(CC) $(CFLAGS) -o $(TEST) $(TESTO) -L. -l$(LIBBASENAME)
+$(TEST): $(TESTO) $(STALIB)
+	$(CC) $(CFLAGS) -o $@ $^ $(LINKLIBS)
 
-conpix: $(CONPIXO)
-	$(CC) $(CFLAGS) -o $(CONPIX) $(CONPIXO) -L. -l$(LIBBASENAME) $(LINKLIBS_LEPT)
+$(CONPIX): $(CONPIXO) $(STALIB)
+	$(CC) $(CFLAGS) -o $@ $^ $(LINKLIBS) $(LINKLIBS_LEPT)
 
-conpix-scroll: $(CONPIXSO)
-	$(CC) $(CFLAGS) -o $(CONPIXS) $(CONPIXSO) -L. -l$(LIBBASENAME) $(LINKLIBS_LEPT)
+$(CONPIXS): $(CONPIXSO) $(STALIB)
+	$(CC) $(CFLAGS) -o $@ $^ $(LINKLIBS) $(LINKLIBS_LEPT)
 
-examples: test conpix conpix-scroll
+examples: $(EXAMPLES)
 
 
-.PHONY: all
+.PHONY: all clean examples
