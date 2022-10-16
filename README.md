@@ -33,15 +33,20 @@ see the examples directory for usage of this library.
 Compilation
 -----------
 
-    make BACKEND=sdl
+    make BACKEND=SDL
 
 or
 
-    make BACKEND=ncurses
+    make BACKEND=NCURSES
 
 or
 
-    make BACKEND=termbox
+    make BACKEND=TERMBOX
+
+if you want to build the example programs, do the same, but use the examples
+target, e.g.
+
+    make BACKEND=NCURSES examples
 
 TODO
 ----
