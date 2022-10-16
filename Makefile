@@ -21,15 +21,11 @@ DYNEXT=.so
 STAEXT=.a
 
 TEST=examples/console_test
-TESTO=$(TEST).o
-
+PLASMA=examples/plasma
 CONPIX=examples/console_conpix
-CONPIXO=$(CONPIX).o
-
 CONPIXS=examples/console_conpix_scroll
-CONPIXSO=$(CONPIXS).o
 
-EXAMPLES=$(TEST) $(CONPIX) $(CONPIXS)
+EXAMPLES=$(TEST) $(PLASMA) $(CONPIX) $(CONPIXS)
 
 -include config.mak
 
@@ -103,13 +99,16 @@ $(MAINLIB): $(DYNLIB)
 %.o: %.c
 	$(CC) -fPIC $(CPPFLAGS) $(CFLAGS) $(INC) $(CPPFLAGS_BE) $(SDL2ADD) -c -o $@ $<
 
-$(TEST): $(TESTO) $(STALIB)
+$(TEST): $(TEST).o $(STALIB)
 	$(CC) $(CFLAGS) -o $@ $^ $(LINKLIBS)
 
-$(CONPIX): $(CONPIXO) $(STALIB)
+$(PLASMA): $(PLASMA).o $(STALIB)
+	$(CC) $(CFLAGS) -o $@ $^ $(LINKLIBS) -lm
+
+$(CONPIX): $(CONPIX).o $(STALIB)
 	$(CC) $(CFLAGS) -o $@ $^ $(LINKLIBS) $(LINKLIBS_LEPT)
 
-$(CONPIXS): $(CONPIXSO) $(STALIB)
+$(CONPIXS): $(CONPIXS).o $(STALIB)
 	$(CC) $(CFLAGS) -o $@ $^ $(LINKLIBS) $(LINKLIBS_LEPT)
 
 examples: $(EXAMPLES)
