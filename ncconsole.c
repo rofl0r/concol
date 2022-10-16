@@ -389,7 +389,7 @@ static int translate_event(struct Console *self, int key) {
 	return ret;
 }
 
-#include <stropts.h>
+#include <strings.h>
 #include <sys/ioctl.h>
 static void deal_with_resize_signal(void) {
 	struct winsize termSize;
