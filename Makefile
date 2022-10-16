@@ -7,7 +7,8 @@ LIBNAME=lib$(LIBBASENAME)
 LINKLIBS_TERMBOX=-ltermbox
 LINKLIBS_SDL=-lSDL
 LINKLIBS_SDL2=-lSDL2
-LINKLIBS_NCURSES=-lncurses -lpthread
+LINKLIBS_NCURSES := $(shell pkg-config --libs ncurses) -lpthread
+LINKLIBS_LEPT := $(shell pkg-config --libs lept)
 
 CFLAGS_OWN=-Wall -Wextra -static -std=c99
 CFLAGS_DBG=-g -O0
@@ -103,10 +104,10 @@ test: $(TESTO)
 	$(CC) $(CFLAGS) -o $(TEST) $(TESTO) -L. -l$(LIBBASENAME)
 
 conpix: $(CONPIXO)
-	$(CC) $(CFLAGS) -o $(CONPIX) $(CONPIXO) -L. -l$(LIBBASENAME) -llept
+	$(CC) $(CFLAGS) -o $(CONPIX) $(CONPIXO) -L. -l$(LIBBASENAME) $(LINKLIBS_LEPT)
 
 conpix-scroll: $(CONPIXSO)
-	$(CC) $(CFLAGS) -o $(CONPIXS) $(CONPIXSO) -L. -l$(LIBBASENAME) -llept
+	$(CC) $(CFLAGS) -o $(CONPIXS) $(CONPIXSO) -L. -l$(LIBBASENAME) $(LINKLIBS_LEPT)
 
 examples: test conpix conpix-scroll
 
